@@ -1,8 +1,10 @@
 module Library where
 import PdePreludat
+import Data.List (isInfixOf, notElem)
 
 doble :: Number -> Number
 doble numero = numero + numero
+
 
 data Alfajor = Alfajor{
   relleno :: [Rellenos],
@@ -10,15 +12,26 @@ data Alfajor = Alfajor{
   dulzor :: Number,
   nombre  :: String
 } deriving Show
+data Clientes = Clientes{
+  nombreDelCliente::String,
+  plataDisponible::Number,
+  gustos::[Alfajor],
+  criterio::[Criterio]
+}deriving Show
+
+type Criterio=Alfajor->Bool
 
 data Rellenos = Rellenos{
   nombreDelRelleno:: String,
   precio :: Number
 }deriving (Show,Eq)
 
+
+
 sumatoriaDeLosRellenos::[Rellenos]->Number
 sumatoriaDeLosRellenos rellenos = (sum . map ( precio )) rellenos
 
+dulceDeLeche :: Rellenos
 dulceDeLeche = Rellenos "DulceDeLeche" 12
 
 mousse = Rellenos "Mousse" 15
@@ -84,7 +97,7 @@ ciertoGradoDePremium::Number-> Alfajor -> Alfajor
 ciertoGradoDePremium 0 alfajor = alfajor 
 ciertoGradoDePremium cantidadDeVecesPremium alfajor 
  | cantidadDeVecesPremium > 0 = ciertoGradoDePremium (cantidadDeVecesPremium - 1) (intentarhacerAlfajorPremium alfajor)
- |otherwise = alfajor
+ | otherwise = alfajor
 
 jorgitito :: Alfajor
 jorgitito = (cambiarleElNombre "jorgitito" . abaratarUnAlfajor) jorgito
@@ -92,15 +105,54 @@ jorgitito = (cambiarleElNombre "jorgitito" . abaratarUnAlfajor) jorgito
 jorgelin:: Alfajor
 jorgelin = (cambiarleElNombre "jorgelin" . agregarleUnaCapaDeRelleno dulceDeLeche ) jorgito
 
+emi::Clientes
+emi = Clientes "Emi" 120   [] [contieneSuNombre "CapitandelEspacio" ]
 
+tomi::Clientes
+tomi = Clientes "tomi" 100 [] [pretencioso , dulcero  ]
 
+dante::Clientes 
+dante = Clientes "Dante" 200 [] [ noLeGustan dulceDeLeche , esExtranio  ]
 
--- jorgitito = (renombrarAlfajor "Jorgitito" . abaratarUnAlfajor) jorgito
+juan::Clientes
+juan = Clientes "juan" 500 [][dulcero , noLeGustan mousse,contieneSuNombre "jorgito", pretencioso ]
 
--- intentarHacerPremium :: Alfajor -> Alfajor
--- intentarHacerPremium alfajor
---     | unAlfajorEsPotable alfajor = hacerPremium (head (capasDeRelleno alfajor)) (nombreDelAlfajor alfajor ++ " premium") alfajor
---     | otherwise = alfajor
+contieneSuNombre:: String->Criterio
+contieneSuNombre palabra alfajor =  palabra `isInfixOf`  (nombre alfajor)
 
--- hacerPremium :: Relleno -> String -> Alfajor -> Alfajor
--- hacerPremium rellenoParaAgregar nombrePremium = agregarCapa rellenoParaAgregar . renombrarAlfajor nombrePremium
+dulcero::Criterio
+dulcero alfajor = coeficienteDelDulzorDeUnAlfajor alfajor > 0.15
+
+-- noTieneDulceDeLeche::
+noLeGustan::Rellenos-> Criterio
+noLeGustan rellenito alfajor = not  (elem rellenito (relleno alfajor)) -- `notElem` (relleno alfajor) rellenito
+
+esExtranio::Criterio
+esExtranio alfajor = not (alfajorPotable alfajor)
+
+pretencioso::Criterio
+pretencioso  = contieneSuNombre "premium"
+
+leGustanAlCliente::Clientes->[Alfajor]->[Alfajor]
+leGustanAlCliente cliente (alfajor:alfajores) = filter ( leGustaeEseAlfajor (criterio cliente) ) alfajores
+
+leGustaeEseAlfajor::[Criterio]->Alfajor->Bool
+leGustaeEseAlfajor criterios alfajor = all ( \ criterio -> criterio alfajor  ) criterios
+
+puedeComprarUnAlfajor::Alfajor ->Clientes ->Clientes
+puedeComprarUnAlfajor  alfajor cliente
+ | plataDisponible cliente > elPrecioDeUnAlfajor alfajor = (alfajorAgregado alfajor . nuevaPLataDisponible alfajor)cliente
+ | otherwise = cliente
+
+alfajorAgregado :: Alfajor ->Clientes->Clientes
+alfajorAgregado alfajor cliente = cliente{
+  gustos = alfajor : gustos cliente
+}
+
+nuevaPLataDisponible::Alfajor ->Clientes->Clientes
+nuevaPLataDisponible alfajor cliente = cliente {
+   plataDisponible = plataDisponible cliente - (elPrecioDeUnAlfajor alfajor)
+}
+
+compraLosAlfajoresQueLeGustan::Clientes->[Alfajor]->Clientes
+compraLosAlfajoresQueLeGustan  cliente alfajores = foldl (flip puedeComprarUnAlfajor ) cliente alfajores
