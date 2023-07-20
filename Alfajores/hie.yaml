@@ -1,0 +1,7 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "Alfajores:lib"
+
+    - path: "./test"
+      component: "Alfajores:test:Alfajores-test"
