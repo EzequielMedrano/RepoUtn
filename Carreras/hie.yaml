@@ -1,0 +1,7 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "Carreras:lib"
+
+    - path: "./test"
+      component: "Carreras:test:Carreras-test"
