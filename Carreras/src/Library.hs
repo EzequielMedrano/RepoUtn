@@ -60,22 +60,7 @@ alterarLaVelocidad :: Modificador->Auto->Auto
 alterarLaVelocidad modificador  auto =  auto{
     velocidad = modificador (velocidad auto)  --lo hice por que me pide la velocidad final , osea la del auto una vez que esta terminando la carrera
 }
--- alterarLaVelocidad :: Modificador->Auto->Auto
--- alterarLaVelocidad modificador  auto = auto{
---     velocidad = modificador (velocidad auto) --lo hice por que me pide la velocidad final , osea la del auto una vez que esta terminando la carrera
--- }
-    --autoEnCarrera carrera auto{
-  --  velocidad = modificador ( velocidad auto )
---} 
 
--- autoEnCarrera::Carrera->Auto->Auto -- lo hice por que me pide la velocidad final , osea la del auto una vez que esta terminando la carrera
--- autoEnCarrera carrera auto = carrera auto 
-
-
--- bajarLaVelocidad :: Number->Modificador->Auto->Auto
--- bajarLaVelocidad leQuitoVelocidad modificador auto = auto {
---     velocidad = max 0 (velocidad auto - velocidad (alterarLaVelocidad ( )auto))
--- }
 bajarLaVelocidad :: Number->Auto->Auto
 bajarLaVelocidad leQuitoVelocidad auto = auto {
     velocidad = max 0 (velocidad auto - leQuitoVelocidad)
