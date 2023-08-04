@@ -1,0 +1,7 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "Pizzas:lib"
+
+    - path: "./test"
+      component: "Pizzas:test:Pizzas-test"
