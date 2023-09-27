@@ -1,0 +1,7 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "recuperatorio:lib"
+
+    - path: "./test"
+      component: "recuperatorio:test:recuperatorio-test"
