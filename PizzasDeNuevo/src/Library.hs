@@ -49,3 +49,4 @@ mezcloLosIngredientesDeLasPizzas pizza1 pizza2 = pizza2 {
 eliminarRepetidos :: Eq a => [a] -> [a]
 eliminarRepetidos [] = []
 eliminarRepetidos (x:xs) = x : eliminarRepetidos (filter (/= x) xs)
+
