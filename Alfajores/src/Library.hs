@@ -52,3 +52,4 @@ eliminarRepetidos [] = []
 eliminarRepetidos (x:xs) = x : eliminarRepetidos (filter (/= x) xs)
 
 --PROBANDO SI FUNCIONA LA RAMAS
+
