@@ -30,7 +30,6 @@ nuevoIngrediente ingrediente pizza = pizza {
     ingredientes = ingrediente : ingredientes pizza ,
     calorias = (length ingrediente * 2) + calorias pizza
 }
-
 agrandar::Pizza->Pizza
 agrandar pizza 
  |tamanio pizza <= 8 = pizza {
