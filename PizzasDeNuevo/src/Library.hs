@@ -37,15 +37,51 @@ agrandar pizza
 }
  |otherwise = pizza
 
-mezcladita :: Pizza->Pizza->Pizza
-mezcladita pizza1 pizza2 = mezcloLosIngredientesDeLasPizzas pizza1 pizza2
+mezcladita::Pizza->Pizza->Pizza
+mezcladita primerPizza segundaPizza = (nuevaPizza primerPizza . subeCalorias primerPizza) segundaPizza
 
+nuevaPizza::Pizza->Pizza->Pizza
+nuevaPizza primerPizza segundaPizza = segundaPizza{
+    ingredientes = sacarRepetidos ( ingredientes segundaPizza ++ ingredientes primerPizza)
+}
+sacarRepetidos::[String]->[String]
+sacarRepetidos [] = []
+sacarRepetidos (ingrediente:ingredientes)
+ | elem ingrediente ingredientes = sacarRepetidos ingredientes
+ | otherwise = ingrediente : sacarRepetidos ingredientes
 
-mezcloLosIngredientesDeLasPizzas :: Pizza -> Pizza -> Pizza
-mezcloLosIngredientesDeLasPizzas pizza1 pizza2 = pizza2 { 
-    ingredientes = ingredientes pizza1 ++ ingredientes pizza2 -- el ++ se usa para cuando quiero unir dos listas
-    }
+subeCalorias::Pizza->Pizza->Pizza
+subeCalorias primerPizza segundaPizza = segundaPizza {
+    calorias = calorias segundaPizza + (calorias primerPizza / 2)
+}
 
-eliminarRepetidos :: Eq a => [a] -> [a]
-eliminarRepetidos [] = []
-eliminarRepetidos (x:xs) = x : eliminarRepetidos (filter (/= x) xs)
+-- No duplicar lógica
+
+nivelDeSatisfaccionDeUnPedido :: [Pizza]->Number
+nivelDeSatisfaccionDeUnPedido pizzas = (sum.map nivelDeSatisfaccion) pizzas --sum(map nivelDeSatisfaccion pizzas)
+
+pizzeriaLosHijosDePato::[Pizza]->[Pizza]
+pizzeriaLosHijosDePato  pizzas = map pizzaConPalmito pizzas
+
+pizzaConPalmito::Pizza->Pizza
+pizzaConPalmito pizza = pizza{
+ingredientes = "palmito" : ingredientes pizza
+}
+
+pizzeriaElResumen :: [Pizza] -> [Pizza]
+pizzeriaElResumen pizzas = zipWith mezcladita pizzas (drop 1 pizzas)
+
+muza :: Pizza
+muza = Pizza ["jamon"] 0 0
+
+queso :: Pizza
+queso = Pizza ["queso"] 0 0
+
+chedar :: Pizza
+chedar = Pizza ["chedar"] 0 0
+
+listaDePizzas ::[Pizza]
+listaDePizzas = [muza ,queso , chedar]
+
+pizzeriaEspecial::Pizza->Pizzeria
+pizzeriaEspecial saborEspecial pizzas = map (mezcladita saborEspecial ) pizzas
