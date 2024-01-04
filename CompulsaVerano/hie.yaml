@@ -1,0 +1,7 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "CompulsaVerano:lib"
+
+    - path: "./test"
+      component: "CompulsaVerano:test:CompulsaVerano-test"
