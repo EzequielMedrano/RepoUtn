@@ -63,14 +63,25 @@ golpe persona palo = (palo . habilidad) persona
 
 -- OBSTACULOS
 
-type Obstaculo = Tiro->Bool
-tunelConRampita::Obstaculo
+-- type Obstaculo = Tiro->Bool
+
+data Obstaculo =  Obstaculo{
+puedeSuperar :: Tiro->Bool,
+efectoLuegoDeSuperar ::Tiro->Tiro
+}
+
+intentaSuperarObstaculo::Obstaculo->Tiro->Tiro
+intentaSuperarObstaculo obstaculo tiro 
+ | puedeSuperar obstaculo tiro = efectoLuegoDeSuperar obstaculo tiro
+ | otherwise = noSuperaElObstaculo
+
+tunelConRampita::Tiro->Bool
 tunelConRampita tiro = precision tiro > 90   
 
-laguna::Obstaculo
+laguna::Tiro->Bool
 laguna tiro =  velocidad tiro > 80 && altura tiro `elem` [1..5]
 
-hoyo::Obstaculo
+hoyo::Tiro->Bool
 hoyo tiro  = precision tiro > 95
 
 --Si supera los obstaculos
@@ -108,7 +119,9 @@ superaHoyo  tiro
 valoresDelTiroEnCero = noSuperaElObstaculo
 
 -- palosUtiles::Jugador->Obstaculo->[Palo]
--- palosUtiles jugador obstactulo = filter ( obstactulo  ) palos
+-- palosUtiles jugador obstactulo = filter ( habilidad jugador  ) palos
+
+
 
 
 
