@@ -53,10 +53,10 @@ paseoEnBarco marea turista
     stress = stress turista + 6,
     cansancio = cansancio turista + 10
  }
+ | moderada marea = turista
  | tranquila marea = (caminarCiertosMinutos 10  .  apreciarAlgunElementoDelPaisaje "Mar". salirAhablarUnIdiomaEspecifico "Aleman") turista -- esta no la vi ,
  -- la hice con chat gpt , composicion de funciones .
- -- cuando quiero que algo o alguien cumpla todas las funciones , uso el aplicacion parcial 
- | moderada marea = turista
+ -- cuando quiero que algo o alguien cumpla todas las funciones , uso aplicacion parcial 
  | otherwise =  turista
 
 -- 1 )
@@ -68,8 +68,10 @@ cathi = Turista 15 15 True ["Aleman","Catalán"]
 --a)
 turistaHaceUnaExcursion :: Excursion -> Turista -> Turista
 turistaHaceUnaExcursion excursion turista = excursion  turista {
-    stress = stress turista - 10 
+    stress = stress turista - reducePorcentajeDelEstress 10 turista
 }
+reducePorcentajeDelEstress:: Number->Turista->Number
+reducePorcentajeDelEstress valor turista = (stress turista * valor ) /100
 
 
 --b)
@@ -80,14 +82,17 @@ deltaExcursionSegun :: (Turista->Number)-> Turista -> Excursion -> Number
 deltaExcursionSegun  indice turista excursion = deltaSegun indice  (turistaHaceUnaExcursion excursion turista) turista
 
  -- c 
+-- laExcursionEsEducativa :: Excursion -> Turista ->Bool
+-- laExcursionEsEducativa excursion turista = length ( idiomas (turistaHaceUnaExcursion excursion turista)) > 0
 laExcursionEsEducativa :: Excursion -> Turista ->Bool
-laExcursionEsEducativa excursion turista = length ( idiomas (turistaHaceUnaExcursion excursion turista)) > 0
+laExcursionEsEducativa excursion turista = length (idiomas turista) < length (idiomas (turistaHaceUnaExcursion excursion turista))
 
 excursionesDesestresantes:: [Excursion]->Turista->[Excursion]
-excursionesDesestresantes excursiones turista = filter ( flip estabajaEstress turista ) excursiones 
+excursionesDesestresantes excursiones turista = filter ( flip estaBajaEstress turista) excursiones 
+    -- filter ( flip estaBajaEstress turista ) excursiones 
 
-estabajaEstress :: Excursion->Turista->Bool
-estabajaEstress excursion turista  = stress (excursion turista) + 3 <= stress turista
+estaBajaEstress :: Excursion->Turista->Bool
+estaBajaEstress excursion turista  = stress (excursion turista) + 3 <= stress turista
 --3)
 type Tour = [Excursion]
 
