@@ -4,146 +4,108 @@ import PdePreludat
 doble :: Number -> Number
 doble numero = numero + numero
 
-data Pizza = Pizza{
- ingredientes:: [String],
- tamanio::Number,
- calorias::Number
+-- data Pizza = Pizza{
+--  ingredientes:: [String],
+--  tamanio::Number,
+--  calorias::Number
+-- }deriving (Show,Eq)
+data Postre = UnPostre{
+  sabores :: [String],
+  peso :: Number,
+  temperatura :: Number
 }deriving (Show,Eq)
 
+-- data Hechizo = UnHechizo{
+
+-- }
+--PUNTO 1-A
+bizcochoDeFruta = UnPostre ["Fruta"] 100 25 
+
+tartaDeMelaza = UnPostre ["Melaza"] 50 0
 
 
-grandeDeMuzza::Pizza
-grandeDeMuzza = Pizza ["Salsa","mozzarella","oregano"] 8 350
+--- PUNTO 1-B
+incendio::Hechizo
+incendio postre = (cambiaDeTemperaturaElPostre 1 . cambiaElPesoDelPostre (-5)) postre 
 
-nivelDeSatisfaccion::Pizza->Number
-nivelDeSatisfaccion pizza
- | elem "palmito" (ingredientes pizza) = 0
- | calorias pizza < 500 = length (ingredientes pizza) * 80
- | otherwise =( length (ingredientes pizza) * 80 ) / 2
-
-valorDeUnaPizza::Pizza->Number
-valorDeUnaPizza pizza = (length (ingredientes pizza) * 120 ) * tamanio pizza
-
-nuevoIngrediente:: String->Pizza->Pizza
-nuevoIngrediente ingrediente pizza = (agregaIngrediente ingrediente . aumentaCalorias ingrediente) pizza
-
-agregaIngrediente::String->Pizza->Pizza
-agregaIngrediente ingrediente pizza = pizza{
-    ingredientes = ingrediente : ingredientes pizza
+cambiaDeTemperaturaElPostre::Number->Postre->Postre
+cambiaDeTemperaturaElPostre valor postre = postre{
+  temperatura = temperatura postre + valor
 }
-aumentaCalorias::String->Pizza->Pizza
-aumentaCalorias ingrediente pizza = pizza{
-    calorias = calorias pizza + (2 * ( length ingrediente))
+cambiaElPesoDelPostre::Number->Postre->Postre
+cambiaElPesoDelPostre valor postre = postre {
+    peso = peso postre + calculoElPorcentajeDelPeso 5 postre 
 }
 
-agrandar::Pizza->Pizza
-agrandar pizza = pizza{
-    tamanio = min 10 (tamanio pizza + 2)
+calculoElPorcentajeDelPeso :: Number->Postre->Number
+calculoElPorcentajeDelPeso valor postre = (valor * peso postre ) / 100
+
+
+type Hechizo = Postre->Postre
+
+
+immobulus::Hechizo
+immobulus postre = postre {
+  temperatura = 0
+}
+wingardiumLeviosa ::  Hechizo
+wingardiumLeviosa postre = postre{
+  peso = peso postre - calculoElPorcentajeDelPeso 10 postre,
+  sabores = sabores postre ++ sabores (agregaSabor "concentrado" postre)
 }
 
-mezcladita::Pizza->Pizza->Pizza
-mezcladita primerPizza segundaPizza = (nuevaPizza primerPizza . subeCalorias primerPizza) segundaPizza
+diffindo :: Number->Hechizo
+diffindo valor postre = cambiaElPesoDelPostre (-valor) postre
 
-nuevaPizza::Pizza->Pizza->Pizza
-nuevaPizza primerPizza segundaPizza = segundaPizza{
-    ingredientes = sacarRepetidos ( ingredientes segundaPizza ++ ingredientes primerPizza)
-}
-sacarRepetidos::[String]->[String]
-sacarRepetidos [] = []
-sacarRepetidos (ingrediente:ingredientes)
- | elem ingrediente ingredientes = sacarRepetidos ingredientes
- | otherwise = ingrediente : sacarRepetidos ingredientes
+riddikulus::String->Hechizo
+riddikulus sabor postre = agregaSabor sabor postre -- ver como se agregan invertido esto.
 
-subeCalorias::Pizza->Pizza->Pizza
-subeCalorias primerPizza segundaPizza = segundaPizza {
-    calorias = calorias segundaPizza + (calorias primerPizza / 2)
+agregaSabor::String->Hechizo
+agregaSabor sabor postre = postre{
+  sabores = sabores postre ++ [sabor]
 }
 
--- No duplicar lógica
-
-nivelDeSatisfaccionDeUnPedido :: [Pizza]->Number
-nivelDeSatisfaccionDeUnPedido pizzas = (sum.map nivelDeSatisfaccion) pizzas --sum(map nivelDeSatisfaccion pizzas)
-
-pizzeriaLosHijosDePato::[Pizza]->[Pizza]
-pizzeriaLosHijosDePato  pizzas = map pizzaConPalmito pizzas
-
-pizzaConPalmito::Pizza->Pizza
-pizzaConPalmito pizza = pizza{
-ingredientes = "palmito" : ingredientes pizza
+avadaKedavra :: Hechizo
+avadaKedavra postre = immobulus  postre{
+  sabores = []--pierde todos sus sabores
 }
 
-pizzeriaElResumen :: [Pizza] -> [Pizza]
-pizzeriaElResumen pizzas = zipWith mezcladita pizzas (drop 1 pizzas)
-
-muza :: Pizza
-muza = Pizza ["jamon"] 0 0
-
-queso :: Pizza
-queso = Pizza ["queso"] 0 0
-
-chedar :: Pizza
-chedar = Pizza ["chedar"] 0 0
-
-listaDePizzas ::[Pizza]
-listaDePizzas = [muza ,queso , chedar]
-
-pizzeriaEspecial::Pizza->Pizzeria
-pizzeriaEspecial saborEspecial pizzas = map (mezcladita saborEspecial ) pizzas
-
-pizzeriaPescadito :: Pizzeria
-pizzeriaPescadito pizzas = pizzeriaEspecial anchoas pizzas
-
-anchoas::Pizza
-anchoas = Pizza ["salsa" ,"anchoas"] 8 270
-
-pizzeriaGourmet::Number->Pizzeria
-pizzeriaGourmet exquisitez pizzas = (agrandarVariasPizzas . satisfaccionMayoraExquisitez exquisitez ) pizzas
-
-satisfaccionMayoraExquisitez::Number->[Pizza]->[Pizza]
-satisfaccionMayoraExquisitez exquisitez pizzas = filter ( \pizza->nivelDeSatisfaccion pizza > exquisitez  ) pizzas
-
-agrandarVariasPizzas::[Pizza]->[Pizza]
-agrandarVariasPizzas pizzas = map ( agrandar ) pizzas
-
-pizzeriaLaJauja::Pizzeria
-pizzeriaLaJauja pizzas = pizzeriaGourmet 399 pizzas
-
-type Pizzeria = [Pizza]->[Pizza]
-type Pedido = [Pizza]
+condicionesParaUnPostreListo::Postre->Bool
+condicionesParaUnPostreListo postre = peso postre > 0 && length (sabores postre) > 0 && temperatura postre > 0
 
 
-sonDignasDeCalleCorrientes::[Pizza]->[Pizzeria]->[Pizzeria]
-sonDignasDeCalleCorrientes  pizzas pizzeria = filter ( pizzeriaQuemejoraLaSatisfaccionDelPedido pizzas ) pizzeria
+hechizoDejaListoAUnPostre::Postre->Hechizo->Bool
+hechizoDejaListoAUnPostre postre hechizo = condicionesParaUnPostreListo (hechizo postre)
+
+--1-D
 
 
-pizzeriaQuemejoraLaSatisfaccionDelPedido::[Pizza]->Pizzeria->Bool
-pizzeriaQuemejoraLaSatisfaccionDelPedido pizzas pizzeria = nivelDeSatisfaccionDeUnPedido (pizzeria pizzas) > nivelDeSatisfaccionDeUnPedido pizzas
+pesoPromedioDeLosPostresListos::[Postre]->Number
+pesoPromedioDeLosPostresListos postres = sum  (map peso (listaDePostresListos postres))
 
--- maximizaLaSatisfaccionDelPedido::[Pizza]->[Pizzeria]->Pizzeria
--- maximizaLaSatisfaccionDelPedido [] [pizzeria] = pizzeria
--- maximizaLaSatisfaccionDelPedido pizzas (pizzeria1:pizzeria2:pizzerias) --(pizzeria:pizzerias1:pizzerias2) 
---  |  pizzeriaQuemejoraLaSatisfaccionDelPedido pizzas pizzeria1 >pizzeriaQuemejoraLaSatisfaccionDelPedido pizzas pizzeria2 = pizzeria
---  |  otherwise =  maximizaLaSatisfaccionDelPedido pizzas pizzerias
-maximizaLaSatisfaccionDelPedido::[Pizza]->[Pizzeria]->Pizzeria
-maximizaLaSatisfaccionDelPedido [] [pizzeria] = pizzeria
-maximizaLaSatisfaccionDelPedido pizzas (pizzeria1:pizzeria2:pizzerias) = maximizaLaSatisfaccionDelPedido pizzas (  ( comparar pizzas pizzeria1 pizzeria2 ) : pizzerias)
+listaDePostresListos::[Postre]->[Postre]
+listaDePostresListos postres = filter condicionesParaUnPostreListo postres
 
-comparar::[Pizza]->Pizzeria->Pizzeria->Pizzeria
-comparar pizzas pizzeria1 pizzeria2 
- | nivelDeSatisfaccionDeUnPedido (pizzeria1 pizzas) > nivelDeSatisfaccionDeUnPedido (pizzeria2 pizzas) = pizzeria1 
- | otherwise = pizzeria2
+
+-- 2-a
+data Mago = UnMago{
+  hechizosAprendidos :: [Hechizo],
+  horrorcruxes :: Number
+}deriving (Show,Eq)
+
+--FALTA EL 2-A
+--2B
+
+obtengoMejorHechizoDelMago::Postre->Mago->Hechizo
+obtengoMejorHechizoDelMago postre mago = head ( filter ( mejorHechizo postre  ) (hechizosAprendidos mago ))
+
+mejorHechizo::Postre->Hechizo->Bool
+mejorHechizo postre hechizo = length (sabores (hechizo postre)) > length (sabores postre )
+
+
+-- 3
 
 
 
-yoPidoCualquierPizza :: (a -> Number) -> (b -> Bool) -> [(a, b)] -> Bool
---yoPidoCualquierPizza  x y z = any (odd . x . fst) z && all (y . snd) z
-yoPidoCualquierPizza  funcionA funcionB lista = any (odd . funcionA . fst) lista && all (funcionB . snd) lista
--- basicamente en esta funcion el any verifica si el primer elemento de la funcionA es un numero par
--- y en el all , verifica que todos los segundos elementos de la funcionb deben cumplir con los elementos que estan 
--- dentro de la lista
 
-laPizzeriaPredilecta::Pedido->[Pizzeria]->Pedido
-laPizzeriaPredilecta pedidos pizzerias = foldl ( realizaUnPedido  ) pedidos  pizzerias
 
-realizaUnPedido::Pedido->Pizzeria->[Pizza]
-realizaUnPedido pedido pizzeria = pizzeria pedido
