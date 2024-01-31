@@ -69,6 +69,7 @@ avadaKedavra :: Hechizo
 avadaKedavra postre = immobulus  postre{
   sabores = []--pierde todos sus sabores
 }
+-- 1-c
 
 condicionesParaUnPostreListo::Postre->Bool
 condicionesParaUnPostreListo postre = peso postre > 0 && length (sabores postre) > 0 && temperatura postre > 0
@@ -88,12 +89,37 @@ listaDePostresListos postres = filter condicionesParaUnPostreListo postres
 
 
 -- 2-a
+
+
 data Mago = UnMago{
   hechizosAprendidos :: [Hechizo],
   horrorcruxes :: Number
 }deriving (Show,Eq)
 
 --FALTA EL 2-A
+
+-- magoAsisteALaClaseDeDefensa::Hechizo->Postre->Mago->Mago
+-- magoAsisteALaClaseDeDefensa hechizo postre mago =  (magoPracticaHechizosobreUnPostre hechizo postre . sumaUnHorrorcrux) mago  --mago (hechizo postre)
+
+-- magoPracticaHechizosobreUnPostre::Hechizo->Postre->Mago->Mago
+-- magoPracticaHechizosobreUnPostre hechizo postre mago =  mago {
+--   hechizosAprendidos = hechizosAprendidos mago ++ [hechizo]
+-- }
+
+-- aplicaHechizoSobreUnPostre::Hechizo->Postre->Postre-- como incluyo esto en el metodo de arriba.
+-- aplicaHechizoSobreUnPostre hechizo postre = hechizo postre 
+
+-- mismoEfectoQueAvadaKedavra::Hechizo->Postre->Bool
+-- mismoEfectoQueAvadaKedavra hechizo postre = sabores( aplicaHechizoSobreUnPostre hechizo postre) == sabores (avadaKedavra hechizo)
+
+-- sumaUnHorrorcrux::Hechizo->Postre->Mago->Mago
+-- sumaUnHorrorcrux hechizo postre mago
+--  | mismoEfectoQueAvadaKedavra hechizo postre = mago{
+--   horrorcruxes = horrorcruxes mago + 1
+--  }
+--  | otherwise = mago 
+
+
 --2B
 
 obtengoMejorHechizoDelMago::Postre->Mago->Hechizo
