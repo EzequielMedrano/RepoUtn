@@ -122,15 +122,45 @@ data Mago = UnMago{
 
 --2B
 
-obtengoMejorHechizoDelMago::Postre->Mago->Hechizo
-obtengoMejorHechizoDelMago postre mago = head ( filter ( mejorHechizo postre  ) (hechizosAprendidos mago ))
+-- obtengoMejorHechizoDelMago::Postre->Mago->Hechizo
+-- obtengoMejorHechizoDelMago postre mago = head ( filter ( mejorHechizo postre  ) (hechizosAprendidos mago ))
 
-mejorHechizo::Postre->Hechizo->Bool
-mejorHechizo postre hechizo = length (sabores (hechizo postre)) > length (sabores postre )
+-- mejorHechizo::Postre->Hechizo->Bool
+-- mejorHechizo postre hechizo = length (sabores (hechizo postre)) > length (sabores postre )
 
 
 -- 3
+------------------
 
+
+-- ejemplo de patter matching 
+aprobar::String->Number
+aprobar palabra  
+ | "vago" == palabra = 10
+ | "inteligente" == palabra = 60
+ | "estudioso" == palabra = 100
+ | otherwise = 50 
+
+--  Representamos las notas que se sacó un alumno en dos parciales mediante un par (nota1, nota2), p.ej. un patito en el 1ro 
+--  y un 7 en el 2do se representan mediante el par (2,7).
+
+-- A partir de esto:
+-- 1. Definir la función esNotaBochazo, recibe un número y devuelve True si no llega a 4, False en caso contrario.
+--  No vale usar guardas.
+
+-- 2. Definir la función aprobo, recibe un par e indica si una persona que se sacó esas notas aprueba.
+
+
+esNotaBochazo::Number->Bool
+esNotaBochazo valor = valor < 4
+
+type Tupla = (Number,Number)
+aprobo::Tupla->Bool
+aprobo valores = fst valores > 6 && snd valores > 6 
+
+
+-- promocion::Tupla-> Bool
+-- promocion valores = sum valores > 14
 
 
 
