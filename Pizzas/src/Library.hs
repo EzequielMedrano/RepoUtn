@@ -4,11 +4,7 @@ import PdePreludat
 doble :: Number -> Number
 doble numero = numero + numero
 
--- data Pizza = Pizza{
---  ingredientes:: [String],
---  tamanio::Number,
---  calorias::Number
--- }deriving (Show,Eq)
+
 data Postre = UnPostre{
   sabores :: [String],
   peso :: Number,
@@ -96,72 +92,31 @@ data Mago = UnMago{
   horrorcruxes :: Number
 }deriving (Show,Eq)
 
---FALTA EL 2-A
 
--- magoAsisteALaClaseDeDefensa::Hechizo->Postre->Mago->Mago
--- magoAsisteALaClaseDeDefensa hechizo postre mago =  (magoPracticaHechizosobreUnPostre hechizo postre . sumaUnHorrorcrux) mago  --mago (hechizo postre)
+----------------------
+--VUELVO A INTENTAR EL 2-A
 
--- magoPracticaHechizosobreUnPostre::Hechizo->Postre->Mago->Mago
--- magoPracticaHechizosobreUnPostre hechizo postre mago =  mago {
---   hechizosAprendidos = hechizosAprendidos mago ++ [hechizo]
--- }
+practicaUnHechizo::Hechizo->Postre->Mago->Mago
+practicaUnHechizo hechizo postre mago = (agregaHechizoAprendido hechizo . sumahorrorcrux hechizo postre ) mago
 
--- aplicaHechizoSobreUnPostre::Hechizo->Postre->Postre-- como incluyo esto en el metodo de arriba.
--- aplicaHechizoSobreUnPostre hechizo postre = hechizo postre 
+agregaHechizoAprendido::Hechizo->Mago->Mago
+agregaHechizoAprendido hechizo mago = mago {
+  hechizosAprendidos = hechizosAprendidos mago ++ [hechizo]
+}
+sumahorrorcrux::Hechizo->Postre->Mago->Mago
+sumahorrorcrux hechizo postre  mago 
+ | mismoResultadoQueAvadaKedavra hechizo postre = mago{
+  horrorcruxes = horrorcruxes mago + 1
+ }
+ | otherwise = mago
 
--- mismoEfectoQueAvadaKedavra::Hechizo->Postre->Bool
--- mismoEfectoQueAvadaKedavra hechizo postre = sabores( aplicaHechizoSobreUnPostre hechizo postre) == sabores (avadaKedavra hechizo)
-
--- sumaUnHorrorcrux::Hechizo->Postre->Mago->Mago
--- sumaUnHorrorcrux hechizo postre mago
---  | mismoEfectoQueAvadaKedavra hechizo postre = mago{
---   horrorcruxes = horrorcruxes mago + 1
---  }
---  | otherwise = mago 
+mismoResultadoQueAvadaKedavra:: Hechizo->Postre->Bool
+mismoResultadoQueAvadaKedavra hechizo postre  = (hechizo postre) == (avadaKedavra postre)
 
 
---2B
+--2-B
 
--- obtengoMejorHechizoDelMago::Postre->Mago->Hechizo
--- obtengoMejorHechizoDelMago postre mago = head ( filter ( mejorHechizo postre  ) (hechizosAprendidos mago ))
-
--- mejorHechizo::Postre->Hechizo->Bool
--- mejorHechizo postre hechizo = length (sabores (hechizo postre)) > length (sabores postre )
-
-
--- 3
-------------------
-
-
--- ejemplo de patter matching 
-aprobar::String->Number
-aprobar palabra  
- | "vago" == palabra = 10
- | "inteligente" == palabra = 60
- | "estudioso" == palabra = 100
- | otherwise = 50 
-
---  Representamos las notas que se sacó un alumno en dos parciales mediante un par (nota1, nota2), p.ej. un patito en el 1ro 
---  y un 7 en el 2do se representan mediante el par (2,7).
-
--- A partir de esto:
--- 1. Definir la función esNotaBochazo, recibe un número y devuelve True si no llega a 4, False en caso contrario.
---  No vale usar guardas.
-
--- 2. Definir la función aprobo, recibe un par e indica si una persona que se sacó esas notas aprueba.
-
-
-esNotaBochazo::Number->Bool
-esNotaBochazo valor = valor < 4
-
-type Tupla = (Number,Number)
-aprobo::Tupla->Bool
-aprobo valores = fst valores > 6 && snd valores > 6 
-
-
--- promocion::Tupla-> Bool
--- promocion valores = sum valores > 14
-
-
+-- obtengoSuMejorHechizo::Postre->Mago->Hechizo
+-- obtengoSuMejorHechizo postre mago = foldl ( \cal-> cal   ) postre (hechizosAprendidos mago)
 
 
