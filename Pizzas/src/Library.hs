@@ -4,146 +4,62 @@ import PdePreludat
 doble :: Number -> Number
 doble numero = numero + numero
 
-data Pizza = Pizza{
- ingredientes:: [String],
- tamanio::Number,
- calorias::Number
-}deriving (Show,Eq)
+--clase del sabado 3/02
+
+data Granuja = UnGranuja{
+  nombre::String,
+  fuerza::Number
+}deriving Show
+
+majinBoo= UnGranuja "Majin Boo" 100
+gra1=UnGranuja "El caballero rojo" 70
+gra2= UnGranuja "Momia" 10
+
+cambiaFuerza :: Granuja -> Granuja -> Granuja
+cambiaFuerza boo granuja = boo { fuerza = fuerza boo + ((length . nombre) granuja * 6) }
+
+fusionarNombre :: Granuja -> Granuja -> Granuja
+fusionarNombre boo granuja = boo { nombre = nombre boo ++ nombre granuja}
+
+-- modificarBoo boo granuja = flip cambiaFuerza granuja . fusionarNombre boo granuja
+
+modificarBoo boo granuja = (flip cambiaFuerza granuja . fusionarNombre boo )granuja --ESTE SI ANDA BIEN-ES DE LA PROFE
+--{nombre = "Majin BooEl caballero rojoMomia", fuerza = 232}
+-- modificarBoo boo granuja = ( cambiaFuerza granuja . fusionarNombre boo) granuja --ESTO ANDA MAL
+-- cambiaFuerza majinBoo gra2 => UnGranuja {nombre = "Majin Boo", fuerza = 184} 50 de la fuerza de majin boo y 34 de
+-- la fuerza de gra2
+
+--fusionarNombre (boo granuja) esto si es un granuja 
+-- fusionarNombre boo granuja -- esto no.
+--VOY CON FOLDL
+mataAEsosGranujas boo granujas = foldl modificarBoo boo granujas
+
+--AHORA CON RECURSIVIDAD
+matoAEsosGranujass boo [] = boo
+matoAEsosGranujass boo (granuja:granujas) = matoAEsosGranujass ( modificarBoo boo granuja ) granujas
 
 
 
-grandeDeMuzza::Pizza
-grandeDeMuzza = Pizza ["Salsa","mozzarella","oregano"] 8 350
+--DEFINIR UNA FUNCION ESMULTIPLODEALGUNO/2 , QUE DADO UN NUMERO Y UNA LISTA DE NUMEROS,DEVUELVE TRUE <=>
+-- EL NUMERO ES MULTIPLO DE ALGUNO DE LOS NUMEROS DE LA LISTA
 
-nivelDeSatisfaccion::Pizza->Number
-nivelDeSatisfaccion pizza
- | elem "palmito" (ingredientes pizza) = 0
- | calorias pizza < 500 = length (ingredientes pizza) * 80
- | otherwise =( length (ingredientes pizza) * 80 ) / 2
-
-valorDeUnaPizza::Pizza->Number
-valorDeUnaPizza pizza = (length (ingredientes pizza) * 120 ) * tamanio pizza
-
-nuevoIngrediente:: String->Pizza->Pizza
-nuevoIngrediente ingrediente pizza = (agregaIngrediente ingrediente . aumentaCalorias ingrediente) pizza
-
-agregaIngrediente::String->Pizza->Pizza
-agregaIngrediente ingrediente pizza = pizza{
-    ingredientes = ingrediente : ingredientes pizza
-}
-aumentaCalorias::String->Pizza->Pizza
-aumentaCalorias ingrediente pizza = pizza{
-    calorias = calorias pizza + (2 * ( length ingrediente))
-}
-
-agrandar::Pizza->Pizza
-agrandar pizza = pizza{
-    tamanio = min 10 (tamanio pizza + 2)
-}
-
-mezcladita::Pizza->Pizza->Pizza
-mezcladita primerPizza segundaPizza = (nuevaPizza primerPizza . subeCalorias primerPizza) segundaPizza
-
-nuevaPizza::Pizza->Pizza->Pizza
-nuevaPizza primerPizza segundaPizza = segundaPizza{
-    ingredientes = sacarRepetidos ( ingredientes segundaPizza ++ ingredientes primerPizza)
-}
-sacarRepetidos::[String]->[String]
-sacarRepetidos [] = []
-sacarRepetidos (ingrediente:ingredientes)
- | elem ingrediente ingredientes = sacarRepetidos ingredientes
- | otherwise = ingrediente : sacarRepetidos ingredientes
-
-subeCalorias::Pizza->Pizza->Pizza
-subeCalorias primerPizza segundaPizza = segundaPizza {
-    calorias = calorias segundaPizza + (calorias primerPizza / 2)
-}
-
--- No duplicar lógica
-
-nivelDeSatisfaccionDeUnPedido :: [Pizza]->Number
-nivelDeSatisfaccionDeUnPedido pizzas = (sum.map nivelDeSatisfaccion) pizzas --sum(map nivelDeSatisfaccion pizzas)
-
-pizzeriaLosHijosDePato::[Pizza]->[Pizza]
-pizzeriaLosHijosDePato  pizzas = map pizzaConPalmito pizzas
-
-pizzaConPalmito::Pizza->Pizza
-pizzaConPalmito pizza = pizza{
-ingredientes = "palmito" : ingredientes pizza
-}
-
-pizzeriaElResumen :: [Pizza] -> [Pizza]
-pizzeriaElResumen pizzas = zipWith mezcladita pizzas (drop 1 pizzas)
-
-muza :: Pizza
-muza = Pizza ["jamon"] 0 0
-
-queso :: Pizza
-queso = Pizza ["queso"] 0 0
-
-chedar :: Pizza
-chedar = Pizza ["chedar"] 0 0
-
-listaDePizzas ::[Pizza]
-listaDePizzas = [muza ,queso , chedar]
-
-pizzeriaEspecial::Pizza->Pizzeria
-pizzeriaEspecial saborEspecial pizzas = map (mezcladita saborEspecial ) pizzas
-
-pizzeriaPescadito :: Pizzeria
-pizzeriaPescadito pizzas = pizzeriaEspecial anchoas pizzas
-
-anchoas::Pizza
-anchoas = Pizza ["salsa" ,"anchoas"] 8 270
-
-pizzeriaGourmet::Number->Pizzeria
-pizzeriaGourmet exquisitez pizzas = (agrandarVariasPizzas . satisfaccionMayoraExquisitez exquisitez ) pizzas
-
-satisfaccionMayoraExquisitez::Number->[Pizza]->[Pizza]
-satisfaccionMayoraExquisitez exquisitez pizzas = filter ( \pizza->nivelDeSatisfaccion pizza > exquisitez  ) pizzas
-
-agrandarVariasPizzas::[Pizza]->[Pizza]
-agrandarVariasPizzas pizzas = map ( agrandar ) pizzas
-
-pizzeriaLaJauja::Pizzeria
-pizzeriaLaJauja pizzas = pizzeriaGourmet 399 pizzas
-
-type Pizzeria = [Pizza]->[Pizza]
-type Pedido = [Pizza]
+-- esMultiploDeAlguno valor lista = any(\list-> (mod valor list) == 0) lista 
+--AHORA PRUEBO CON ORDEN SUPERIOR
+esMultiploDeAlguno valor lista = any((== 0) . mod valor) lista 
 
 
-sonDignasDeCalleCorrientes::[Pizza]->[Pizzeria]->[Pizzeria]
-sonDignasDeCalleCorrientes  pizzas pizzeria = filter ( pizzeriaQuemejoraLaSatisfaccionDelPedido pizzas ) pizzeria
+------------------------
+-- VISTO EN UNA CLASE DE YT
 
+--FOLDR
+hacerRight :: (t1 -> t2 -> t2) -> t2 -> [t1] -> t2
+hacerRight funcion valorBase [] =valorBase
+hacerRight funcion valorBase (c:cola) = funcion c (hacerRight funcion valorBase cola) 
 
-pizzeriaQuemejoraLaSatisfaccionDelPedido::[Pizza]->Pizzeria->Bool
-pizzeriaQuemejoraLaSatisfaccionDelPedido pizzas pizzeria = nivelDeSatisfaccionDeUnPedido (pizzeria pizzas) > nivelDeSatisfaccionDeUnPedido pizzas
+--FOLDL
+hacerLeft :: (t1 -> t2 -> t1) -> t1 -> [t2] -> t1
+hacerLeft funcion valorBase [] = valorBase
+hacerLeft funcion valorBase (c:cola) = hacerLeft funcion (funcion valorBase c)cola
 
--- maximizaLaSatisfaccionDelPedido::[Pizza]->[Pizzeria]->Pizzeria
--- maximizaLaSatisfaccionDelPedido [] [pizzeria] = pizzeria
--- maximizaLaSatisfaccionDelPedido pizzas (pizzeria1:pizzeria2:pizzerias) --(pizzeria:pizzerias1:pizzerias2) 
---  |  pizzeriaQuemejoraLaSatisfaccionDelPedido pizzas pizzeria1 >pizzeriaQuemejoraLaSatisfaccionDelPedido pizzas pizzeria2 = pizzeria
---  |  otherwise =  maximizaLaSatisfaccionDelPedido pizzas pizzerias
-maximizaLaSatisfaccionDelPedido::[Pizza]->[Pizzeria]->Pizzeria
-maximizaLaSatisfaccionDelPedido [] [pizzeria] = pizzeria
-maximizaLaSatisfaccionDelPedido pizzas (pizzeria1:pizzeria2:pizzerias) = maximizaLaSatisfaccionDelPedido pizzas (  ( comparar pizzas pizzeria1 pizzeria2 ) : pizzerias)
+menorDeUna lista = foldl min ( head lista ) lista
 
-comparar::[Pizza]->Pizzeria->Pizzeria->Pizzeria
-comparar pizzas pizzeria1 pizzeria2 
- | nivelDeSatisfaccionDeUnPedido (pizzeria1 pizzas) > nivelDeSatisfaccionDeUnPedido (pizzeria2 pizzas) = pizzeria1 
- | otherwise = pizzeria2
-
-
-
-yoPidoCualquierPizza :: (a -> Number) -> (b -> Bool) -> [(a, b)] -> Bool
---yoPidoCualquierPizza  x y z = any (odd . x . fst) z && all (y . snd) z
-yoPidoCualquierPizza  funcionA funcionB lista = any (odd . funcionA . fst) lista && all (funcionB . snd) lista
--- basicamente en esta funcion el any verifica si el primer elemento de la funcionA es un numero par
--- y en el all , verifica que todos los segundos elementos de la funcionb deben cumplir con los elementos que estan 
--- dentro de la lista
-
-laPizzeriaPredilecta::Pedido->[Pizzeria]->Pedido
-laPizzeriaPredilecta pedidos pizzerias = foldl ( realizaUnPedido  ) pedidos  pizzerias
-
-realizaUnPedido::Pedido->Pizzeria->[Pizza]
-realizaUnPedido pedido pizzeria = pizzeria pedido
