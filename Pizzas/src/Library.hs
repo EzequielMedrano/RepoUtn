@@ -115,8 +115,13 @@ mismoResultadoQueAvadaKedavra hechizo postre  = (hechizo postre) == (avadaKedavr
 
 
 --2-B
+-- mejorHechizo::Postre->Mago->Hechizo
+-- mejorHechizo postre mago = foldl1 (maximo postre) (hechizosAprendidos mago)
+-- mejorHechizo::Postre->Mago->Hechizo
+-- mejorHechizo postre mago = foldl (min 0 (usaElPostre postre)) (head (hechizosAprendidos mago)) (hechizosAprendidos mago)
 
--- obtengoSuMejorHechizo::Postre->Mago->Hechizo
--- obtengoSuMejorHechizo postre mago = foldl ( \cal-> cal   ) postre (hechizosAprendidos mago)
+usaElPostre :: Postre->Hechizo->Number
+usaElPostre postre hechizo =  length (sabores (hechizo postre))
 
+maximo postre hechizo = max 0 (usaElPostre postre hechizo)
 
