@@ -4,146 +4,104 @@ import PdePreludat
 doble :: Number -> Number
 doble numero = numero + numero
 
-data Pizza = Pizza{
- ingredientes:: [String],
- tamanio::Number,
- calorias::Number
-}deriving (Show,Eq)
+data Participante = UnParticipante {
+  nombre :: String,
+  edad ::  Number,
+  nivelDeAtractivo :: Number,
+  nivelDePersonalidad :: Number,
+  nivelDeInteligencia :: Number,-- todos numeros decimales en un principio
+  criterioDeVoto :: CriterioDeVoto
+}deriving (Show)
+
+
+-- Las pruebas semanales son eventos que tienen un criterio para ser
+-- superadas, pero también tienen un índice de éxito (decimal) que es un
+-- número entre 0 y 100 y determina qué tan bien se supera la prueba. Si la
+-- prueba no se supera, el índice de éxito es 0.
+------PRUEBAS
+type Prueba = Participante->Number
+
+baileDeTikTok::Prueba
+baileDeTikTok  persona 
+ | requierePersonalidad 20 persona = indiceDeExitoTikTok persona
+ | otherwise = 0
+
+botonRojo ::  Prueba
+botonRojo  persona 
+ | requierePersonalidad 10 persona && requiereInteligencia 20 persona = indiceDeExitoBotonRojo persona--aplicar composicion
+ | otherwise = 0
+
+cuentasRapidas::Prueba
+cuentasRapidas  persona 
+  | requiereInteligencia 40 persona = indiceDeExitoDeCuentasRapidas persona
+  | otherwise = 0
+
+type Indice = Participante->Number
+
+indiceDeExitoTikTok::Indice
+indiceDeExitoTikTok  persona =  nivelDePersonalidad persona + (nivelDeAtractivo persona * 2 )
+
+indiceDeExitoBotonRojo::Indice
+indiceDeExitoBotonRojo persona = 100
+
+indiceDeExitoDeCuentasRapidas ::Indice
+indiceDeExitoDeCuentasRapidas persona = nivelDeInteligencia persona + nivelDePersonalidad persona - nivelDeAtractivo persona
+
+requierePersonalidad::Number->Participante->Bool
+requierePersonalidad valor persona = valor >= nivelDePersonalidad persona
+
+-- requiereInteligencia::Number->Participante->Bool
+-- requiereInteligencia valor persona = valor >= nivelDeInteligencia persona
+requiereInteligencia::Number->Participante->Bool
+requiereInteligencia valor persona = valor >= nivelDeInteligencia persona
+
+-- PUNTO 2-a
+
+quienesSuperanLaPruebas::Prueba->[Participante]->[Participante]
+quienesSuperanLaPruebas  prueba personas = filter (superaUnaPrueba prueba) personas
+
+superaUnaPrueba::Prueba->Participante->Bool
+superaUnaPrueba prueba persona = prueba persona > 0
+
+--Punto 2-b
+-- promedioDelIndiceDeExito :: [Participante]->Prueba->Number
+-- promedioDelIndiceDeExito participantes prueba =   / length participantes
+
+-- sumatoriaDeIndicesDeExito :: [Number]->Number
+-- sumatoriaDeIndicesDeExito valores = sum valores
+
+--2-c
+participanteFavorito::Participante->[Prueba]->Bool
+participanteFavorito participante pruebas = all(\prueba->superaUnaPruebaConUnIndiceMayorACincuenta participante prueba ) pruebas
+
+superaUnaPruebaConUnIndiceMayorACincuenta::Participante->Prueba->Bool
+superaUnaPruebaConUnIndiceMayorACincuenta participante prueba = prueba participante > 50
+
+--3
+type CriterioDeVoto = Participante -> [Number] -> Number
+
+menosInteligente :: CriterioDeVoto
+menosInteligente personas = foldl min ( nivelDeInteligencia personas)
+
+masAtractivo :: CriterioDeVoto
+masAtractivo personas = foldl max (nivelDeAtractivo personas)
+
+masViejo :: CriterioDeVoto
+masViejo personas = foldl max (edad personas)
+
+--4
+javierTulei = UnParticipante "Javier Tulei" 52 30 70 35 menosInteligente
+
+minimoKirchner = UnParticipante "Minimo Kirchner" 46 0 40 50 masAtractivo
+
+horacioBerreta = UnParticipante "Horacio Berreta" 57 10 60 50 masAtractivo
+
+myriamBregwoman = UnParticipante "Myriam Bregwoman" 51 40 40 60 masViejo
+
+--5
+-- Luego de votar, nos interesa saber quiénes están en placa, esos son
+-- todos los participantes que, al menos, una persona votó.
+-- participantesEnPlaca participantes 
 
 
 
-grandeDeMuzza::Pizza
-grandeDeMuzza = Pizza ["Salsa","mozzarella","oregano"] 8 350
-
-nivelDeSatisfaccion::Pizza->Number
-nivelDeSatisfaccion pizza
- | elem "palmito" (ingredientes pizza) = 0
- | calorias pizza < 500 = length (ingredientes pizza) * 80
- | otherwise =( length (ingredientes pizza) * 80 ) / 2
-
-valorDeUnaPizza::Pizza->Number
-valorDeUnaPizza pizza = (length (ingredientes pizza) * 120 ) * tamanio pizza
-
-nuevoIngrediente:: String->Pizza->Pizza
-nuevoIngrediente ingrediente pizza = (agregaIngrediente ingrediente . aumentaCalorias ingrediente) pizza
-
-agregaIngrediente::String->Pizza->Pizza
-agregaIngrediente ingrediente pizza = pizza{
-    ingredientes = ingrediente : ingredientes pizza
-}
-aumentaCalorias::String->Pizza->Pizza
-aumentaCalorias ingrediente pizza = pizza{
-    calorias = calorias pizza + (2 * ( length ingrediente))
-}
-
-agrandar::Pizza->Pizza
-agrandar pizza = pizza{
-    tamanio = min 10 (tamanio pizza + 2)
-}
-
-mezcladita::Pizza->Pizza->Pizza
-mezcladita primerPizza segundaPizza = (nuevaPizza primerPizza . subeCalorias primerPizza) segundaPizza
-
-nuevaPizza::Pizza->Pizza->Pizza
-nuevaPizza primerPizza segundaPizza = segundaPizza{
-    ingredientes = sacarRepetidos ( ingredientes segundaPizza ++ ingredientes primerPizza)
-}
-sacarRepetidos::[String]->[String]
-sacarRepetidos [] = []
-sacarRepetidos (ingrediente:ingredientes)
- | elem ingrediente ingredientes = sacarRepetidos ingredientes
- | otherwise = ingrediente : sacarRepetidos ingredientes
-
-subeCalorias::Pizza->Pizza->Pizza
-subeCalorias primerPizza segundaPizza = segundaPizza {
-    calorias = calorias segundaPizza + (calorias primerPizza / 2)
-}
-
--- No duplicar lógica
-
-nivelDeSatisfaccionDeUnPedido :: [Pizza]->Number
-nivelDeSatisfaccionDeUnPedido pizzas = (sum.map nivelDeSatisfaccion) pizzas --sum(map nivelDeSatisfaccion pizzas)
-
-pizzeriaLosHijosDePato::[Pizza]->[Pizza]
-pizzeriaLosHijosDePato  pizzas = map pizzaConPalmito pizzas
-
-pizzaConPalmito::Pizza->Pizza
-pizzaConPalmito pizza = pizza{
-ingredientes = "palmito" : ingredientes pizza
-}
-
-pizzeriaElResumen :: [Pizza] -> [Pizza]
-pizzeriaElResumen pizzas = zipWith mezcladita pizzas (drop 1 pizzas)
-
-muza :: Pizza
-muza = Pizza ["jamon"] 0 0
-
-queso :: Pizza
-queso = Pizza ["queso"] 0 0
-
-chedar :: Pizza
-chedar = Pizza ["chedar"] 0 0
-
-listaDePizzas ::[Pizza]
-listaDePizzas = [muza ,queso , chedar]
-
-pizzeriaEspecial::Pizza->Pizzeria
-pizzeriaEspecial saborEspecial pizzas = map (mezcladita saborEspecial ) pizzas
-
-pizzeriaPescadito :: Pizzeria
-pizzeriaPescadito pizzas = pizzeriaEspecial anchoas pizzas
-
-anchoas::Pizza
-anchoas = Pizza ["salsa" ,"anchoas"] 8 270
-
-pizzeriaGourmet::Number->Pizzeria
-pizzeriaGourmet exquisitez pizzas = (agrandarVariasPizzas . satisfaccionMayoraExquisitez exquisitez ) pizzas
-
-satisfaccionMayoraExquisitez::Number->[Pizza]->[Pizza]
-satisfaccionMayoraExquisitez exquisitez pizzas = filter ( \pizza->nivelDeSatisfaccion pizza > exquisitez  ) pizzas
-
-agrandarVariasPizzas::[Pizza]->[Pizza]
-agrandarVariasPizzas pizzas = map ( agrandar ) pizzas
-
-pizzeriaLaJauja::Pizzeria
-pizzeriaLaJauja pizzas = pizzeriaGourmet 399 pizzas
-
-type Pizzeria = [Pizza]->[Pizza]
-type Pedido = [Pizza]
-
-
-sonDignasDeCalleCorrientes::[Pizza]->[Pizzeria]->[Pizzeria]
-sonDignasDeCalleCorrientes  pizzas pizzeria = filter ( pizzeriaQuemejoraLaSatisfaccionDelPedido pizzas ) pizzeria
-
-
-pizzeriaQuemejoraLaSatisfaccionDelPedido::[Pizza]->Pizzeria->Bool
-pizzeriaQuemejoraLaSatisfaccionDelPedido pizzas pizzeria = nivelDeSatisfaccionDeUnPedido (pizzeria pizzas) > nivelDeSatisfaccionDeUnPedido pizzas
-
--- maximizaLaSatisfaccionDelPedido::[Pizza]->[Pizzeria]->Pizzeria
--- maximizaLaSatisfaccionDelPedido [] [pizzeria] = pizzeria
--- maximizaLaSatisfaccionDelPedido pizzas (pizzeria1:pizzeria2:pizzerias) --(pizzeria:pizzerias1:pizzerias2) 
---  |  pizzeriaQuemejoraLaSatisfaccionDelPedido pizzas pizzeria1 >pizzeriaQuemejoraLaSatisfaccionDelPedido pizzas pizzeria2 = pizzeria
---  |  otherwise =  maximizaLaSatisfaccionDelPedido pizzas pizzerias
-maximizaLaSatisfaccionDelPedido::[Pizza]->[Pizzeria]->Pizzeria
-maximizaLaSatisfaccionDelPedido [] [pizzeria] = pizzeria
-maximizaLaSatisfaccionDelPedido pizzas (pizzeria1:pizzeria2:pizzerias) = maximizaLaSatisfaccionDelPedido pizzas (  ( comparar pizzas pizzeria1 pizzeria2 ) : pizzerias)
-
-comparar::[Pizza]->Pizzeria->Pizzeria->Pizzeria
-comparar pizzas pizzeria1 pizzeria2 
- | nivelDeSatisfaccionDeUnPedido (pizzeria1 pizzas) > nivelDeSatisfaccionDeUnPedido (pizzeria2 pizzas) = pizzeria1 
- | otherwise = pizzeria2
-
-
-
-yoPidoCualquierPizza :: (a -> Number) -> (b -> Bool) -> [(a, b)] -> Bool
---yoPidoCualquierPizza  x y z = any (odd . x . fst) z && all (y . snd) z
-yoPidoCualquierPizza  funcionA funcionB lista = any (odd . funcionA . fst) lista && all (funcionB . snd) lista
--- basicamente en esta funcion el any verifica si el primer elemento de la funcionA es un numero par
--- y en el all , verifica que todos los segundos elementos de la funcionb deben cumplir con los elementos que estan 
--- dentro de la lista
-
-laPizzeriaPredilecta::Pedido->[Pizzeria]->Pedido
-laPizzeriaPredilecta pedidos pizzerias = foldl ( realizaUnPedido  ) pedidos  pizzerias
-
-realizaUnPedido::Pedido->Pizzeria->[Pizza]
-realizaUnPedido pedido pizzeria = pizzeria pedido
