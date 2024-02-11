@@ -15,14 +15,14 @@ data Postre = UnPostre{
 
 -- }
 --PUNTO 1-A
-bizcochoDeFruta = UnPostre ["Fruta"] 100 25 
+bizcochoDeFruta = UnPostre ["Fruta"] 100 25
 
 tartaDeMelaza = UnPostre ["Melaza"] 50 0
 
 
 --- PUNTO 1-B
 incendio::Hechizo
-incendio postre = (cambiaDeTemperaturaElPostre 1 . cambiaElPesoDelPostre (-5)) postre 
+incendio postre = (cambiaDeTemperaturaElPostre 1 . cambiaElPesoDelPostre (-5)) postre
 
 cambiaDeTemperaturaElPostre::Number->Postre->Postre
 cambiaDeTemperaturaElPostre valor postre = postre{
@@ -30,7 +30,7 @@ cambiaDeTemperaturaElPostre valor postre = postre{
 }
 cambiaElPesoDelPostre::Number->Postre->Postre
 cambiaElPesoDelPostre valor postre = postre {
-    peso = peso postre + calculoElPorcentajeDelPeso 5 postre 
+    peso = peso postre + calculoElPorcentajeDelPeso 5 postre
 }
 
 calculoElPorcentajeDelPeso :: Number->Postre->Number
@@ -104,7 +104,7 @@ agregaHechizoAprendido hechizo mago = mago {
   hechizosAprendidos = hechizosAprendidos mago ++ [hechizo]
 }
 sumahorrorcrux::Hechizo->Postre->Mago->Mago
-sumahorrorcrux hechizo postre  mago 
+sumahorrorcrux hechizo postre  mago
  | mismoResultadoQueAvadaKedavra hechizo postre = mago{
   horrorcruxes = horrorcruxes mago + 1
  }
@@ -118,10 +118,11 @@ mismoResultadoQueAvadaKedavra hechizo postre  = (hechizo postre) == (avadaKedavr
 -- mejorHechizo::Postre->Mago->Hechizo
 -- mejorHechizo postre mago = foldl1 (maximo postre) (hechizosAprendidos mago)
 -- mejorHechizo::Postre->Mago->Hechizo
--- mejorHechizo postre mago = foldl (min 0 (usaElPostre postre)) (head (hechizosAprendidos mago)) (hechizosAprendidos mago)
+-- mejorHechizo postre mago = foldl () (head (hechizosAprendidos mago)) (hechizosAprendidos mago)
 
-usaElPostre :: Postre->Hechizo->Number
-usaElPostre postre hechizo =  length (sabores (hechizo postre))
+usaElPostre :: Postre->Hechizo->Postre
+usaElPostre postre hechizo =  hechizo postre
 
-maximo postre hechizo = max 0 (usaElPostre postre hechizo)
+-- maximo postre listaDePostres = max (length (sabores (usaElPostre postre hechizo)))
+
 
