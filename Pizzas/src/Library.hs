@@ -4,146 +4,59 @@ import PdePreludat
 doble :: Number -> Number
 doble numero = numero + numero
 
-data Pizza = Pizza{
- ingredientes:: [String],
- tamanio::Number,
- calorias::Number
-}deriving (Show,Eq)
+data Persona = UnaPersona{
+  nick::String,
+  felicidad::Number,
+  librosQueAdquirio::[Libro],
+  librosLeidos::[Libro]
+}deriving (Eq,Show) 
 
+data Libro = UnLibro{
+  titulo :: String,
+  loEscribio:: Persona,
+  cantPaginas :: Number,
+  efecto:: Efecto -- cómo afecta el género a las personas que lo lean.
+}deriving (Eq, Show)
 
-
-grandeDeMuzza::Pizza
-grandeDeMuzza = Pizza ["Salsa","mozzarella","oregano"] 8 350
-
-nivelDeSatisfaccion::Pizza->Number
-nivelDeSatisfaccion pizza
- | elem "palmito" (ingredientes pizza) = 0
- | calorias pizza < 500 = length (ingredientes pizza) * 80
- | otherwise =( length (ingredientes pizza) * 80 ) / 2
-
-valorDeUnaPizza::Pizza->Number
-valorDeUnaPizza pizza = (length (ingredientes pizza) * 120 ) * tamanio pizza
-
-nuevoIngrediente:: String->Pizza->Pizza
-nuevoIngrediente ingrediente pizza = (agregaIngrediente ingrediente . aumentaCalorias ingrediente) pizza
-
-agregaIngrediente::String->Pizza->Pizza
-agregaIngrediente ingrediente pizza = pizza{
-    ingredientes = ingrediente : ingredientes pizza
+aumentaFelicidad ::Number->Persona->Persona
+aumentaFelicidad valor persona = persona{
+  felicidad = felicidad persona + valor
 }
-aumentaCalorias::String->Pizza->Pizza
-aumentaCalorias ingrediente pizza = pizza{
-    calorias = calorias pizza + (2 * ( length ingrediente))
+adquiereLibro::Libro->Persona->Persona
+adquiereLibro libro persona = persona {
+  librosLeidos = librosLeidos persona ++ [libro]
 }
+condicionParaQueSeConsidereLeido::Persona->Libro->Libro->Bool
+condicionParaQueSeConsidereLeido persona libro1 libro2  = titulo libro1 == titulo libro2 && (loEscribio libro1) == persona
 
-agrandar::Pizza->Pizza
-agrandar pizza = pizza{
-    tamanio = min 10 (tamanio pizza + 2)
-}
+romero :: Persona
+romero = UnaPersona "romero" 100 [patoruzito] [patoruzito]
 
-mezcladita::Pizza->Pizza->Pizza
-mezcladita primerPizza segundaPizza = (nuevaPizza primerPizza . subeCalorias primerPizza) segundaPizza
+patoruzito = UnLibro "patoruzito" romero 100 libroCienciaFiccion
+type Efecto = Persona->Persona
 
-nuevaPizza::Pizza->Pizza->Pizza
-nuevaPizza primerPizza segundaPizza = segundaPizza{
-    ingredientes = sacarRepetidos ( ingredientes segundaPizza ++ ingredientes primerPizza)
-}
-sacarRepetidos::[String]->[String]
-sacarRepetidos [] = []
-sacarRepetidos (ingrediente:ingredientes)
- | elem ingrediente ingredientes = sacarRepetidos ingredientes
- | otherwise = ingrediente : sacarRepetidos ingredientes
+-- libroComedia::String->Efecto
+-- libroComedia tipoDeComedia persona 
+--  | tipoDeComedia == "dramáticas" = persona
+--  | tipoDeComedia == "absurdas" = aumentaFelicidad 5 persona 
+--  | tipoDeComedia == "satíricas" = aumentaFelicidad (felicidad persona) persona
+--  | otherwise = aumentaFelicidad 10 persona
+----EFECTOS
 
-subeCalorias::Pizza->Pizza->Pizza
-subeCalorias primerPizza segundaPizza = segundaPizza {
-    calorias = calorias segundaPizza + (calorias primerPizza / 2)
+libroCienciaFiccion :: Efecto
+libroCienciaFiccion = \p -> p { nick = reverse (nick p) }-- simulo el reverse
+
+libroTerror::Efecto
+libroTerror persona = persona{
+  librosQueAdquirio = []
 }
 
--- No duplicar lógica
-
-nivelDeSatisfaccionDeUnPedido :: [Pizza]->Number
-nivelDeSatisfaccionDeUnPedido pizzas = (sum.map nivelDeSatisfaccion) pizzas --sum(map nivelDeSatisfaccion pizzas)
-
-pizzeriaLosHijosDePato::[Pizza]->[Pizza]
-pizzeriaLosHijosDePato  pizzas = map pizzaConPalmito pizzas
-
-pizzaConPalmito::Pizza->Pizza
-pizzaConPalmito pizza = pizza{
-ingredientes = "palmito" : ingredientes pizza
-}
-
-pizzeriaElResumen :: [Pizza] -> [Pizza]
-pizzeriaElResumen pizzas = zipWith mezcladita pizzas (drop 1 pizzas)
-
-muza :: Pizza
-muza = Pizza ["jamon"] 0 0
-
-queso :: Pizza
-queso = Pizza ["queso"] 0 0
-
-chedar :: Pizza
-chedar = Pizza ["chedar"] 0 0
-
-listaDePizzas ::[Pizza]
-listaDePizzas = [muza ,queso , chedar]
-
-pizzeriaEspecial::Pizza->Pizzeria
-pizzeriaEspecial saborEspecial pizzas = map (mezcladita saborEspecial ) pizzas
-
-pizzeriaPescadito :: Pizzeria
-pizzeriaPescadito pizzas = pizzeriaEspecial anchoas pizzas
-
-anchoas::Pizza
-anchoas = Pizza ["salsa" ,"anchoas"] 8 270
-
-pizzeriaGourmet::Number->Pizzeria
-pizzeriaGourmet exquisitez pizzas = (agrandarVariasPizzas . satisfaccionMayoraExquisitez exquisitez ) pizzas
-
-satisfaccionMayoraExquisitez::Number->[Pizza]->[Pizza]
-satisfaccionMayoraExquisitez exquisitez pizzas = filter ( \pizza->nivelDeSatisfaccion pizza > exquisitez  ) pizzas
-
-agrandarVariasPizzas::[Pizza]->[Pizza]
-agrandarVariasPizzas pizzas = map ( agrandar ) pizzas
-
-pizzeriaLaJauja::Pizzeria
-pizzeriaLaJauja pizzas = pizzeriaGourmet 399 pizzas
-
-type Pizzeria = [Pizza]->[Pizza]
-type Pedido = [Pizza]
+leeUnLibro::Libro->Efecto->Persona->Persona
+leeUnLibro libro efecto persona = (adquiereLibro libro . efecto ) persona 
 
 
-sonDignasDeCalleCorrientes::[Pizza]->[Pizzeria]->[Pizzeria]
-sonDignasDeCalleCorrientes  pizzas pizzeria = filter ( pizzeriaQuemejoraLaSatisfaccionDelPedido pizzas ) pizzeria
-
-
-pizzeriaQuemejoraLaSatisfaccionDelPedido::[Pizza]->Pizzeria->Bool
-pizzeriaQuemejoraLaSatisfaccionDelPedido pizzas pizzeria = nivelDeSatisfaccionDeUnPedido (pizzeria pizzas) > nivelDeSatisfaccionDeUnPedido pizzas
-
--- maximizaLaSatisfaccionDelPedido::[Pizza]->[Pizzeria]->Pizzeria
--- maximizaLaSatisfaccionDelPedido [] [pizzeria] = pizzeria
--- maximizaLaSatisfaccionDelPedido pizzas (pizzeria1:pizzeria2:pizzerias) --(pizzeria:pizzerias1:pizzerias2) 
---  |  pizzeriaQuemejoraLaSatisfaccionDelPedido pizzas pizzeria1 >pizzeriaQuemejoraLaSatisfaccionDelPedido pizzas pizzeria2 = pizzeria
---  |  otherwise =  maximizaLaSatisfaccionDelPedido pizzas pizzerias
-maximizaLaSatisfaccionDelPedido::[Pizza]->[Pizzeria]->Pizzeria
-maximizaLaSatisfaccionDelPedido [] [pizzeria] = pizzeria
-maximizaLaSatisfaccionDelPedido pizzas (pizzeria1:pizzeria2:pizzerias) = maximizaLaSatisfaccionDelPedido pizzas (  ( comparar pizzas pizzeria1 pizzeria2 ) : pizzerias)
-
-comparar::[Pizza]->Pizzeria->Pizzeria->Pizzeria
-comparar pizzas pizzeria1 pizzeria2 
- | nivelDeSatisfaccionDeUnPedido (pizzeria1 pizzas) > nivelDeSatisfaccionDeUnPedido (pizzeria2 pizzas) = pizzeria1 
- | otherwise = pizzeria2
+sePusoAlDiaConLosLibros::Libro->Persona->Bool
+sePusoAlDiaConLosLibros libro persona = any (condicionParaQueSeConsidereLeido persona libro ) (librosLeidos persona)
 
 
 
-yoPidoCualquierPizza :: (a -> Number) -> (b -> Bool) -> [(a, b)] -> Bool
---yoPidoCualquierPizza  x y z = any (odd . x . fst) z && all (y . snd) z
-yoPidoCualquierPizza  funcionA funcionB lista = any (odd . funcionA . fst) lista && all (funcionB . snd) lista
--- basicamente en esta funcion el any verifica si el primer elemento de la funcionA es un numero par
--- y en el all , verifica que todos los segundos elementos de la funcionb deben cumplir con los elementos que estan 
--- dentro de la lista
-
-laPizzeriaPredilecta::Pedido->[Pizzeria]->Pedido
-laPizzeriaPredilecta pedidos pizzerias = foldl ( realizaUnPedido  ) pedidos  pizzerias
-
-realizaUnPedido::Pedido->Pizzeria->[Pizza]
-realizaUnPedido pedido pizzeria = pizzeria pedido
