@@ -38,8 +38,11 @@ cuentasRapidas  persona
 
 type Indice = Participante->Number
 
+-- indiceDeExitoTikTok::Indice
+-- indiceDeExitoTikTok  persona =  nivelDePersonalidad persona + (nivelDeAtractivo persona * 2 )
 indiceDeExitoTikTok::Indice
-indiceDeExitoTikTok  persona =  nivelDePersonalidad persona + (nivelDeAtractivo persona * 2 )
+indiceDeExitoTikTok  persona = ((*2).nivelDeAtractivo)persona + nivelDePersonalidad persona 
+
 
 indiceDeExitoBotonRojo::Indice
 indiceDeExitoBotonRojo persona = 100
@@ -47,13 +50,12 @@ indiceDeExitoBotonRojo persona = 100
 indiceDeExitoDeCuentasRapidas ::Indice
 indiceDeExitoDeCuentasRapidas persona = nivelDeInteligencia persona + nivelDePersonalidad persona - nivelDeAtractivo persona
 
-requierePersonalidad::Number->Participante->Bool
-requierePersonalidad valor persona = valor >= nivelDePersonalidad persona
 
--- requiereInteligencia::Number->Participante->Bool
--- requiereInteligencia valor persona = valor >= nivelDeInteligencia persona
+requierePersonalidad::Number->Participante->Bool
+requierePersonalidad valor = (>= valor) . nivelDePersonalidad  
+
 requiereInteligencia::Number->Participante->Bool
-requiereInteligencia valor persona = valor >= nivelDeInteligencia persona
+requiereInteligencia valor = (>= valor) . nivelDeInteligencia 
 
 -- PUNTO 2-a
 
@@ -62,6 +64,8 @@ quienesSuperanLaPruebas  prueba personas = filter (superaUnaPrueba prueba) perso
 
 superaUnaPrueba::Prueba->Participante->Bool
 superaUnaPrueba prueba persona = prueba persona > 0
+
+nuevo1 = UnParticipante "nuevo1" 52 30 70 35 menosInteligente
 
 --Punto 2-b
 -- promedioDelIndiceDeExito :: [Participante]->Prueba->Number
@@ -90,6 +94,8 @@ masViejo :: CriterioDeVoto
 masViejo personas = foldl max (edad personas)
 
 --4
+
+
 javierTulei = UnParticipante "Javier Tulei" 52 30 70 35 menosInteligente
 
 minimoKirchner = UnParticipante "Minimo Kirchner" 46 0 40 50 masAtractivo
