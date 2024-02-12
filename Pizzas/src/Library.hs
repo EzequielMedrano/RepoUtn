@@ -18,6 +18,8 @@ data DiagnosticoMedico = UnMedico{
   monto :: Number
 }deriving Show
 
+
+--FUNCIONES AUXILIARES
 aumentaPeso animal alimentoBalanceado = animal {
   peso = peso animal + ajusteDePeso alimentoBalanceado
 }
@@ -28,7 +30,7 @@ ajusteDePeso alimentoBalanceado
 registraUnaVisita diasDeRecuperacion costo = UnMedico{monto = costo ,diasDeRec = diasDeRecuperacion}
 
 estaBienDePeso animal pesoNormal = peso animal > pesoNormal
- ---------------------
+ --------------------------
 
 
 laPasoMal medico = diasDeRec medico > 30
