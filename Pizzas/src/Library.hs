@@ -7,7 +7,7 @@ doble numero = numero + numero
 data Elemento = UnElemento {
   tipo::String,
   ataque ::Ataque,
-  defensa::Defensa
+  defensa::[Defensa]-- chequear si esto esta bien que se cambie
 }deriving Show
 
 
@@ -28,12 +28,14 @@ bajaLaSalud  valor personaje  = personaje {salud = max 0 (salud personaje - valo
 saludIgualACero :: Personaje -> Personaje -> Bool
 saludIgualACero personaje enemigo = danioQueProduce personaje ((head . elementos) enemigo) == 0
 
-personaje1 = UnPersonaje "Pepe" 100 [] 100 
+personaje1 = UnPersonaje "Pepe" 100 [] 100
 
 esBirro elemento = elemento{
   tipo = "Maldad",
-  ataque = causarDanio  1 
+  ataque = causarDanio  1
 }
+meditarSegunNivelDeConcentracion :: Number -> [Efecto]
+meditarSegunNivelDeConcentracion nivelConcentracion = replicate nivelConcentracion meditar
 --PUNTO 1 
 
 type Efecto = Number->Personaje -> Personaje
@@ -58,22 +60,29 @@ enemigosMortales personaje enemigos = filter ( saludIgualACero personaje ) enemi
 
 
 --PUNTO 3
--- concentracion elemento nivelConcentracion = elemento{
---   defensa = head (meditarSegunNivelDeConcentracion nivelConcentracion),
---   tipo = "Magia"
--- }
-meditarSegunNivelDeConcentracion nivelConcentracion = replicate nivelConcentracion meditar
+concentracion  nivelConcentracion elemento = elemento{
+  defensa = replicate nivelConcentracion (meditar 10),
+  tipo = "Magia"
+}
 
+esBirrosMalvados :: Number -> Elemento -> [Elemento]
 esBirrosMalvados cantidad elemento= replicate cantidad (esBirro elemento)
 
-jack elemento = UnPersonaje "jack" 300 [katanaMagica elemento] 200
+jack elemento = UnPersonaje "jack" 300 [concentracion 2 elemento ,katanaMagica elemento] 200
 
 katanaMagica elemento = elemento {
   tipo = "Magia",
   ataque = causarDanio 100
 }
 
-aku anio cantSalud elemento = UnPersonaje "aku" cantSalud  (esBirrosMalvados anio elemento) anio
+aku :: Number -> Number -> Elemento -> Personaje
+aku anio cantSalud elemento = UnPersonaje "aku" cantSalud  [concentracion 4 elemento, portalAlFuturo elemento ] anio-- falta esBirraMalvados 100 elemento
 
-elementoDeAku :: Number -> Elemento -> [Elemento]
-elementoDeAku anio elemento =  esBirrosMalvados anio elemento
+portalAlFuturo  elemento = elemento{
+  ataque = mandoAlFuturo
+}
+
+mandoAlFuturo  personaje = personaje{
+  anioPresente = anioPresente personaje + 2800
+}
+
