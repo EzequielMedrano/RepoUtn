@@ -13,13 +13,20 @@ data Persona = UnaPersona{
 
 data Libro = UnLibro{
   titulo :: String,
-  loEscribio:: Persona,
+  loEscribio:: String,
   cantPaginas :: Number,
   efecto:: Efecto -- cómo afecta el género a las personas que lo lean.
 }deriving (Eq, Show)
 
-condicionParaQueSeConsidereLeido::Persona->Libro->Libro->Bool
-condicionParaQueSeConsidereLeido persona libro1 libro2  = titulo libro1 == titulo libro2 -- && loEscribio libro1 == persona
+--FUNCIONES AUXILIARES 
+
+romero :: Persona
+romero = UnaPersona "romero" 100 [patoruzito] [patoruzito]
+
+patoruzito :: Libro
+patoruzito = UnLibro "patoruzito" "romero" 100 libroCienciaFiccion
+condicionParaQueSeConsidereLeido :: String -> Libro -> Libro -> Bool
+condicionParaQueSeConsidereLeido persona libro1 libro2  = titulo libro1 == titulo libro2 && loEscribio libro1 == persona
 
 aumentaFelicidad ::Number->Persona->Persona
 aumentaFelicidad valor persona = persona{
@@ -33,19 +40,19 @@ cantidadDePaginasMayorQue libro cantidad = cantPaginas libro > cantidad
 cantidadDePaginasMenorQue libro cantidad = cantPaginas libro < cantidad
 
 
-romero :: Persona
-romero = UnaPersona "romero" 100 [patoruzito] [patoruzito]
 
-patoruzito = UnLibro "patoruzito" romero 100 libroCienciaFiccion
+
+---------PARTE B
 type Efecto = Persona->Persona
 
--- libroComedia::String->Efecto
--- libroComedia tipoDeComedia persona 
---  | tipoDeComedia == "dramáticas" = persona
---  | tipoDeComedia == "absurdas" = aumentaFelicidad 5 persona 
---  | tipoDeComedia == "satíricas" = aumentaFelicidad (felicidad persona) persona
---  | otherwise = aumentaFelicidad 10 persona
-----EFECTOS
+comediaDramatica :: Efecto
+comediaDramatica persona = persona
+comediaAbsurda :: Efecto
+comediaAbsurda = aumentaFelicidad 5
+libroSatirica :: Efecto
+libroSatirica persona = aumentaFelicidad (felicidad persona) persona
+otrasComedias :: Efecto
+otrasComedias persona = aumentaFelicidad 10 persona
 
 libroCienciaFiccion :: Efecto
 libroCienciaFiccion = \p -> p { nick = reverse (nick p) }-- simulo el reverse
@@ -61,10 +68,17 @@ leeUnLibro libro efecto persona = (adquiereLibro libro . efecto ) persona
 
 
 sePusoAlDiaConLosLibros::Libro->Persona->Bool
-sePusoAlDiaConLosLibros libro persona = any (condicionParaQueSeConsidereLeido persona libro ) (librosLeidos persona)
+sePusoAlDiaConLosLibros libro persona = any (condicionParaQueSeConsidereLeido (nick persona) libro ) (librosLeidos persona)
 
-fanaticoDelEscritor::Libro->Persona->Bool
-fanaticoDelEscritor libro persona = all(\libroleido-> loEscribio libroleido == persona) (librosLeidos persona)
+
+fanaticoDelEscritor :: Persona -> Persona -> Bool
+fanaticoDelEscritor persona escritor = all  (libroEscritoPor escritor) (librosLeidos persona)
+
+libroEscritoPor :: Persona -> Libro -> Bool
+libroEscritoPor escritor libro = loEscribio libro == nick escritor
+
+
+  --all(\libroleido-> loEscribio libroleido == persona) (librosLeidos persona)
 
 -- Una persona no puede ponerse al dia con una lista infinita de libros porque no hay un tope o algo que frene esa busqueda como podria
 -- ser un take , Esto es posible debido a la evaluación perezosa.
