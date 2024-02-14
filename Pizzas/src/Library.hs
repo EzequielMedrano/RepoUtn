@@ -1,149 +1,121 @@
 module Library where
 import PdePreludat
+import Data.List (nub)
 
 doble :: Number -> Number
 doble numero = numero + numero
 
-data Pizza = Pizza{
- ingredientes:: [String],
- tamanio::Number,
- calorias::Number
-}deriving (Show,Eq)
+
+data Material = UnMaterial{
+    nombre :: String,
+    calidad :: Number
+} deriving(Show ,Eq)
+
+madera = UnMaterial "madera" 25
+
+data Edificio = UnEdificio{
+    tipoEdificio :: String,
+    materiales :: [Material]
+} deriving (Show ,Eq)
+
+data Aldea = UnaAldea{
+    poblacion :: Number,
+    materialesDisponibles :: [Material],
+    edificios :: [Edificio]
+} deriving (Show, Eq) 
+
+--funciones Auxiliares
+
+esUnMaterialConElMismoNombre  nombreDelMaterial material = nombreDelMaterial == nombre material
+
+sumatoriaDeTodosLosMaterialesDisponibles :: [Material] -> Number
+sumatoriaDeTodosLosMaterialesDisponibles materiales = sum  (map calidad materiales) -- == (sum . map calidad)  materiales 
+
+aumentoLaclidadDeLosMateriales :: Aldea -> [Material]
+aumentoLaclidadDeLosMateriales aldea = map aumentoEnCalidad (unidadesDisponibles "Madera" aldea)
 
 
-
-grandeDeMuzza::Pizza
-grandeDeMuzza = Pizza ["Salsa","mozzarella","oregano"] 8 350
-
-nivelDeSatisfaccion::Pizza->Number
-nivelDeSatisfaccion pizza
- | elem "palmito" (ingredientes pizza) = 0
- | calorias pizza < 500 = length (ingredientes pizza) * 80
- | otherwise =( length (ingredientes pizza) * 80 ) / 2
-
-valorDeUnaPizza::Pizza->Number
-valorDeUnaPizza pizza = (length (ingredientes pizza) * 120 ) * tamanio pizza
-
-nuevoIngrediente:: String->Pizza->Pizza
-nuevoIngrediente ingrediente pizza = (agregaIngrediente ingrediente . aumentaCalorias ingrediente) pizza
-
-agregaIngrediente::String->Pizza->Pizza
-agregaIngrediente ingrediente pizza = pizza{
-    ingredientes = ingrediente : ingredientes pizza
+aumentoEnCalidad :: Material -> Material
+aumentoEnCalidad material = material {
+  calidad = calidad material + 5
 }
-aumentaCalorias::String->Pizza->Pizza
-aumentaCalorias ingrediente pizza = pizza{
-    calorias = calorias pizza + (2 * ( length ingrediente))
-}
+obtengoListaDeMateriales :: Aldea -> [[Material]]
+obtengoListaDeMateriales aldea = map materiales (edificios aldea)
 
-agrandar::Pizza->Pizza
-agrandar pizza = pizza{
-    tamanio = min 10 (tamanio pizza + 2)
-}
+---------1-----------
 
-mezcladita::Pizza->Pizza->Pizza
-mezcladita primerPizza segundaPizza = (nuevaPizza primerPizza . subeCalorias primerPizza) segundaPizza
+esValioso :: Material -> Bool
+esValioso = (> 25).calidad
 
-nuevaPizza::Pizza->Pizza->Pizza
-nuevaPizza primerPizza segundaPizza = segundaPizza{
-    ingredientes = sacarRepetidos ( ingredientes segundaPizza ++ ingredientes primerPizza)
-}
-sacarRepetidos::[String]->[String]
-sacarRepetidos [] = []
-sacarRepetidos (ingrediente:ingredientes)
- | elem ingrediente ingredientes = sacarRepetidos ingredientes
- | otherwise = ingrediente : sacarRepetidos ingredientes
+unidadesDisponibles :: String -> Aldea -> [Material]
+unidadesDisponibles nombreDelMaterial aldea = filter ((== nombreDelMaterial). nombre) (materialesDisponibles aldea)
 
-subeCalorias::Pizza->Pizza->Pizza
-subeCalorias primerPizza segundaPizza = segundaPizza {
-    calorias = calorias segundaPizza + (calorias primerPizza / 2)
-}
+valorTotal :: Aldea -> Number
+valorTotal aldea = sumatoriaDeTodosLosMaterialesDisponibles (materialesDisponibles aldea) + (sum . map sumatoriaDeTodosLosMaterialesDisponibles . obtengoListaDeMateriales $ aldea)
+--PUNTO INTERESANTE.
 
--- No duplicar lógica
+--- PUNTO 2
+type Tarea = Aldea -> Aldea
 
-nivelDeSatisfaccionDeUnPedido :: [Pizza]->Number
-nivelDeSatisfaccionDeUnPedido pizzas = (sum.map nivelDeSatisfaccion) pizzas --sum(map nivelDeSatisfaccion pizzas)
-
-pizzeriaLosHijosDePato::[Pizza]->[Pizza]
-pizzeriaLosHijosDePato  pizzas = map pizzaConPalmito pizzas
-
-pizzaConPalmito::Pizza->Pizza
-pizzaConPalmito pizza = pizza{
-ingredientes = "palmito" : ingredientes pizza
+tenerGnomito :: Tarea
+tenerGnomito aldea = aldea{
+  poblacion = poblacion aldea + 1
 }
 
-pizzeriaElResumen :: [Pizza] -> [Pizza]
-pizzeriaElResumen pizzas = zipWith mezcladita pizzas (drop 1 pizzas)
+ilustrarMaderas :: Tarea
+ilustrarMaderas aldea = aldea{
+  materialesDisponibles = aumentoLaclidadDeLosMateriales aldea
+}
 
-muza :: Pizza
-muza = Pizza ["jamon"] 0 0
+recolectar :: Number -> Material -> Tarea
+recolectar   cantidadARecolectar material  aldea = aldea{
+  materialesDisponibles = materialesDisponibles aldea ++ replicate cantidadARecolectar material
+}
 
-queso :: Pizza
-queso = Pizza ["queso"] 0 0
+------------ PUNTO 3
 
-chedar :: Pizza
-chedar = Pizza ["chedar"] 0 0
-
-listaDePizzas ::[Pizza]
-listaDePizzas = [muza ,queso , chedar]
-
-pizzeriaEspecial::Pizza->Pizzeria
-pizzeriaEspecial saborEspecial pizzas = map (mezcladita saborEspecial ) pizzas
-
-pizzeriaPescadito :: Pizzeria
-pizzeriaPescadito pizzas = pizzeriaEspecial anchoas pizzas
-
-anchoas::Pizza
-anchoas = Pizza ["salsa" ,"anchoas"] 8 270
-
-pizzeriaGourmet::Number->Pizzeria
-pizzeriaGourmet exquisitez pizzas = (agrandarVariasPizzas . satisfaccionMayoraExquisitez exquisitez ) pizzas
-
-satisfaccionMayoraExquisitez::Number->[Pizza]->[Pizza]
-satisfaccionMayoraExquisitez exquisitez pizzas = filter ( \pizza->nivelDeSatisfaccion pizza > exquisitez  ) pizzas
-
-agrandarVariasPizzas::[Pizza]->[Pizza]
-agrandarVariasPizzas pizzas = map ( agrandar ) pizzas
-
-pizzeriaLaJauja::Pizzeria
-pizzeriaLaJauja pizzas = pizzeriaGourmet 399 pizzas
-
-type Pizzeria = [Pizza]->[Pizza]
-type Pedido = [Pizza]
+obtengoEdificiosChetos :: Aldea -> [Edificio]
+obtengoEdificiosChetos aldea = filter edificioCheto (edificios aldea)
 
 
-sonDignasDeCalleCorrientes::[Pizza]->[Pizzeria]->[Pizzeria]
-sonDignasDeCalleCorrientes  pizzas pizzeria = filter ( pizzeriaQuemejoraLaSatisfaccionDelPedido pizzas ) pizzeria
+edificioCheto :: Edificio -> Bool
+edificioCheto edificio = any esValioso (materiales edificio)
 
 
-pizzeriaQuemejoraLaSatisfaccionDelPedido::[Pizza]->Pizzeria->Bool
-pizzeriaQuemejoraLaSatisfaccionDelPedido pizzas pizzeria = nivelDeSatisfaccionDeUnPedido (pizzeria pizzas) > nivelDeSatisfaccionDeUnPedido pizzas
+----- 3-b
+materialesComunes :: Aldea -> [Material]
+materialesComunes aldea = nub . unirTodasLasListas . map (esComun aldea) . listaDeMaterialesDeCadaEdificio $ aldea
 
--- maximizaLaSatisfaccionDelPedido::[Pizza]->[Pizzeria]->Pizzeria
--- maximizaLaSatisfaccionDelPedido [] [pizzeria] = pizzeria
--- maximizaLaSatisfaccionDelPedido pizzas (pizzeria1:pizzeria2:pizzerias) --(pizzeria:pizzerias1:pizzerias2) 
---  |  pizzeriaQuemejoraLaSatisfaccionDelPedido pizzas pizzeria1 >pizzeriaQuemejoraLaSatisfaccionDelPedido pizzas pizzeria2 = pizzeria
---  |  otherwise =  maximizaLaSatisfaccionDelPedido pizzas pizzerias
-maximizaLaSatisfaccionDelPedido::[Pizza]->[Pizzeria]->Pizzeria
-maximizaLaSatisfaccionDelPedido [] [pizzeria] = pizzeria
-maximizaLaSatisfaccionDelPedido pizzas (pizzeria1:pizzeria2:pizzerias) = maximizaLaSatisfaccionDelPedido pizzas (  ( comparar pizzas pizzeria1 pizzeria2 ) : pizzerias)
-
-comparar::[Pizza]->Pizzeria->Pizzeria->Pizzeria
-comparar pizzas pizzeria1 pizzeria2 
- | nivelDeSatisfaccionDeUnPedido (pizzeria1 pizzas) > nivelDeSatisfaccionDeUnPedido (pizzeria2 pizzas) = pizzeria1 
- | otherwise = pizzeria2
+esComun :: Aldea -> [Material] -> [[Material]]
+esComun aldea primeraLista = map (  filtradoMaterialComun (listaDeMaterialesDeCadaEdificio aldea) ) $ primeraLista
 
 
+quitarReptidos materiales = undefined
 
-yoPidoCualquierPizza :: (a -> Number) -> (b -> Bool) -> [(a, b)] -> Bool
---yoPidoCualquierPizza  x y z = any (odd . x . fst) z && all (y . snd) z
-yoPidoCualquierPizza  funcionA funcionB lista = any (odd . funcionA . fst) lista && all (funcionB . snd) lista
--- basicamente en esta funcion el any verifica si el primer elemento de la funcionA es un numero par
--- y en el all , verifica que todos los segundos elementos de la funcionb deben cumplir con los elementos que estan 
--- dentro de la lista
+filtradoMaterialComun :: [[Material]] -> Material -> [Material]
+filtradoMaterialComun listasDeMateriales material
+    |  all (elem material) listasDeMateriales = [material]
+    | otherwise = []
 
-laPizzeriaPredilecta::Pedido->[Pizzeria]->Pedido
-laPizzeriaPredilecta pedidos pizzerias = foldl ( realizaUnPedido  ) pedidos  pizzerias
+unirTodasLasListas :: [[[Material]]]-> [Material]
+unirTodasLasListas listas = foldl1 (++) . foldl1 (++) $ listas
 
-realizaUnPedido::Pedido->Pizzeria->[Pizza]
-realizaUnPedido pedido pizzeria = pizzeria pedido
+listaDeMaterialesDeCadaEdificio :: Aldea -> [[Material]]
+listaDeMaterialesDeCadaEdificio aldea = map materiales . edificios $ aldea
+
+--PUNTO 4
+type Criterio = Aldea->Bool
+realizarLasQueCumplen::[Tarea]->Criterio->Aldea->Aldea
+realizarLasQueCumplen [] criterio aldea = aldea
+realizarLasQueCumplen (tarea:tarea2:tareas) criterio aldea 
+ |tareaValida tarea aldea criterio = realizarLasQueCumplen (tarea:tareas) criterio (tarea aldea)
+ |otherwise = realizarLasQueCumplen (tarea2:tareas) criterio (tarea2 aldea)
+
+realizoTarea :: Tarea->Aldea->Aldea
+realizoTarea tarea aldea = tarea aldea
+
+
+tareaValida :: Tarea->Aldea->Criterio->Bool
+tareaValida tarea aldea criterio = (criterio. tarea) aldea
+------PUNTO 4-B
+
