@@ -31,14 +31,7 @@ esUnMaterialConElMismoNombre  nombreDelMaterial material = nombreDelMaterial == 
 sumatoriaDeTodosLosMaterialesDisponibles :: [Material] -> Number
 sumatoriaDeTodosLosMaterialesDisponibles materiales = sum  (map calidad materiales) -- == (sum . map calidad)  materiales 
 
-aumentoLaclidadDeLosMateriales :: Aldea -> [Material]
-aumentoLaclidadDeLosMateriales aldea = map aumentoEnCalidad (unidadesDisponibles "Madera" aldea)
 
-
-aumentoEnCalidad :: Material -> Material
-aumentoEnCalidad material = material {
-  calidad = calidad material + 5
-}
 obtengoListaDeMateriales :: Aldea -> [[Material]]
 obtengoListaDeMateriales aldea = map materiales (edificios aldea)
 
@@ -47,13 +40,14 @@ obtengoListaDeMateriales aldea = map materiales (edificios aldea)
 esValioso :: Material -> Bool
 esValioso = (> 25).calidad
 
-unidadesDisponibles :: String -> Aldea -> [Material]
-unidadesDisponibles nombreDelMaterial aldea = filter ((== nombreDelMaterial). nombre) (materialesDisponibles aldea)
+unidadesDisponibles :: String -> Aldea -> Number
+unidadesDisponibles nombreDelMaterial aldea = length  (filter ((== nombreDelMaterial). nombre) (materialesDisponibles aldea))
 
 valorTotal :: Aldea -> Number
-valorTotal aldea = sumatoriaDeTodosLosMaterialesDisponibles (materialesDisponibles aldea) + (sum . map sumatoriaDeTodosLosMaterialesDisponibles . obtengoListaDeMateriales $ aldea)
+valorTotal aldea = sumatoriaDeTodosLosMaterialesDisponibles (materialesDisponibles aldea) + sum (map sumatoriaDeTodosLosMaterialesDisponibles (obtengoListaDeMateriales aldea))
+-- (sum . map sumatoriaDeTodosLosMaterialesDisponibles . obtengoListaDeMateriales $ aldea)               
 --PUNTO INTERESANTE.
-
+aldea1 = UnaAldea 100 [] []
 --- PUNTO 2
 type Tarea = Aldea -> Aldea
 
@@ -64,8 +58,17 @@ tenerGnomito aldea = aldea{
 
 ilustrarMaderas :: Tarea
 ilustrarMaderas aldea = aldea{
-  materialesDisponibles = aumentoLaclidadDeLosMateriales aldea
+  materialesDisponibles = aumentoLacalidadDeLosMateriales aldea
 }
+aumentoLacalidadDeLosMateriales :: Aldea -> [Material]
+aumentoLacalidadDeLosMateriales aldea = map aumentoEnCalidad (materialesDisponibles aldea)
+
+aumentoEnCalidad :: Material -> Material
+aumentoEnCalidad material 
+ | nombre material == "Madera" = material{
+  calidad = calidad material + 5
+ }
+ | otherwise = material
 
 recolectar :: Number -> Material -> Tarea
 recolectar   cantidadARecolectar material  aldea = aldea{
@@ -117,5 +120,14 @@ realizoTarea tarea aldea = tarea aldea
 
 tareaValida :: Tarea->Aldea->Criterio->Bool
 tareaValida tarea aldea criterio = (criterio. tarea) aldea
+--------
+realizarLasQueCumplen2 :: [Tarea]->Criterio->Aldea -> Aldea
+realizarLasQueCumplen2 tareas criterio aldea = foldl (aplicarTarea criterio ) aldea (tareas) 
+
+aplicarTarea :: Criterio -> Aldea -> Tarea -> Aldea
+aplicarTarea criterio aldea tarea
+  --  | criterio . tarea $ aldea =  tarea aldea
+    | criterio ( tarea aldea )= tarea aldea
+    | otherwise = aldea
 ------PUNTO 4-B
 
