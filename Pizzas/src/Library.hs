@@ -9,7 +9,8 @@ data Animal = UnAnimal{
   tipo::String,
   peso::Number,
   edad::Number,
-  estaEnfermo::DiagnosticoMedico -- lo cual puede requerir una visita medica de alguna veterinaria
+  estaEnfermo::Bool,
+  diagnosticoMed::[DiagnosticoMedico] -- lo cual puede requerir una visita medica de alguna veterinaria
   -- que diagnostica a los dias de recuperacion y le cobra un costo por la atencion
 }deriving (Show)
 
@@ -27,43 +28,57 @@ ajusteDePeso alimentoBalanceado
  | alimentoBalanceado <= 5 = alimentoBalanceado / 2
  | otherwise = 5
 
-registraUnaVisita diasDeRecuperacion costo = UnMedico{monto = costo ,diasDeRec = diasDeRecuperacion}
+-- registraUnaVisita :: Number -> Number -> DiagnosticoMedico
+-- registraUnaVisita diasDeRecuperacion costo = UnMedico{monto = costo ,diasDeRec = diasDeRecuperacion}
 
+registraUnaVisita :: Number -> Number -> Actividad
+registraUnaVisita diasDeRecuperacion costo animal = animal{
+  diagnosticoMed = UnMedico {monto = costo ,diasDeRec = diasDeRecuperacion} : diagnosticoMed animal 
+} 
 estaBienDePeso animal pesoNormal = peso animal > pesoNormal
+
+diagnostico :: DiagnosticoMedico
+diagnostico = UnMedico 35 100
  --------------------------
+--PUNTO 1
+laPasoMal :: Animal -> Bool
+laPasoMal animal = any ((>30).diasDeRec) (diagnosticoMed animal)
 
-
-laPasoMal medico = diasDeRec medico > 30
+nombreFalopa :: Animal -> Bool
 nombreFalopa animal = last (nombre animal) == 'i'
 
 --PUNTO 2
-
 type Actividad = Animal->Animal
+
 engorde :: Number -> Actividad
 engorde alimentoBalanceado animal = aumentaPeso animal alimentoBalanceado
 
--- revisacion diasDeRecuperacion costo animal medico  
---  | diasDeRec medico > 0 = (registraUnaVisita diasDeRecuperacion costo  . engorde 2) animal 
---  | otherwise = animal
+revisacion :: Number->Number->Actividad
+revisacion dias costo actividad 
+ | estaEnfermo actividad = (engorde 2 . registraUnaVisita costo dias ) actividad
+ | otherwise = actividad
 
 festejoCumple :: Actividad
 festejoCumple animal = animal{ edad = edad animal + 1}
 
-animal1 = UnAnimal "lola" "vaca" 100 2 diagnostico
-diagnostico = UnMedico 35 100
 
--- chequeDePeso :: Animal -> Number -> Number -> Number -> Animal
--- chequeDePeso animal pesoNormal diasDeRecuperacion costo 
---  | estaBienDePeso animal pesoNormal = animal
---  | otherwise = registraUnaVisita diasDeRecuperacion costo (estaEnfermo animal)
+-- chequeDePeso :: Number -> Number -> Number -> Actividad
+-- chequeDePeso  pesoX diasDeRecuperacion costo animal
+--  | estaBienDePeso animal pesoX = animal
+--  | otherwise = revisacion diasDeRecuperacion costo animal -- entendi Mal EL ENUNCIADO
 
--- PUNTO 3, no entiendo bien que pidio 
+chequeoDePeso :: Number -> Actividad
+chequeoDePeso unPeso animal = animal { estaEnfermo = peso animal <= unPeso}
 
-proceso animal = festejoCumple . engorde 10
+-- PUNTO 3
 
---festejoCumple animal1 : UnAnimal {nombre = "lola", tipo = "vaca", peso = 100, edad = 3, estaEnfermo = UnMedico {diasDeRec = 35, monto = 100}}
---engorde 10 animal1 : UnAnimal {nombre = "lola", tipo = "vaca", peso = 105, edad = 2, estaEnfermo = UnMedico {diasDeRec = 35, monto = 100}}
--- hay que testear las otras dos
+
+
+proceso :: [Actividad]
+proceso = [festejoCumple , engorde 10 , revisacion 10 5 , chequeoDePeso 5]--OJO ,ANTE UNA DUDA DEL ENUNCIADO, PREGUNTAR.
+animal1 = UnAnimal 
+
+elAnimalRecorreElProceso animal = foldr ($) animal proceso-- ME FALTO ESTO-- ESTO HACE QUE EL ANIMAL RECORRA LA LISTA DE ACTIVIDADES.
 
 --PUNTO 4
 
