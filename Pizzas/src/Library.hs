@@ -130,4 +130,15 @@ aplicarTarea criterio aldea tarea
     | criterio ( tarea aldea )= tarea aldea
     | otherwise = aldea
 ------PUNTO 4-B
+tareas :: [Tarea]
+tareas = [tenerGnomito,tenerGnomito,tenerGnomito]
+masComidaQuePoblacion aldea tarea = unidadesDisponibles "Comida" aldea > poblacion (tenerGnomito aldea)
 
+--4-b
+maderaDePino = replicate 30 (UnMaterial "maderaDePino" (calidadMaxima aldea1) )
+
+
+calidadMaxima :: Aldea -> Number
+calidadMaxima aldea =  foldl1 max (map calidad ((esUnMaterialValioso . materialesDisponibles) aldea))
+
+esUnMaterialValioso materiales = filter(esValioso) materiales
