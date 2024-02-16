@@ -6,7 +6,7 @@ doble numero = numero + numero
 
 data Elemento = UnElemento {
   tipo::String,
-  ataque ::Ataque,
+  ataque ::Personaje->Personaje,
   defensa::[Defensa]-- chequear si esto esta bien que se cambie
 }deriving Show
 
@@ -36,12 +36,14 @@ esBirro elemento = elemento{
 }
 meditarSegunNivelDeConcentracion :: Number -> [Efecto]
 meditarSegunNivelDeConcentracion nivelConcentracion = replicate nivelConcentracion meditar
+usoAtaqueContraMi :: Personaje -> Elemento -> Number
+usoAtaqueContraMi personaje elemento = salud (ataque elemento personaje )
 --PUNTO 1 
 
 type Efecto = Number->Personaje -> Personaje
 
 mandarAlAnio :: Efecto
-mandarAlAnio  anio personaje = personaje { anioPresente= anio}
+mandarAlAnio  anio personaje = personaje { anioPresente = anio}
 
 meditar :: Efecto
 meditar valor personaje  = personaje{salud = salud personaje + valor/2}
@@ -53,7 +55,8 @@ causarDanio = bajaLaSalud
 esMalvado personaje = "Maldad" `elem`  map tipo (elementos personaje)
 
 danioQueProduce::Personaje->Elemento->Number
-danioQueProduce personaje elemento = salud personaje -  (salud . ataque elemento) personaje
+danioQueProduce personaje elemento = salud personaje -  usoAtaqueContraMi personaje elemento
+--(salud . ataque elemento) personaje
 
 
 enemigosMortales personaje enemigos = filter ( saludIgualACero personaje ) enemigos
